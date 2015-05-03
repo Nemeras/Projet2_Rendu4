@@ -119,7 +119,7 @@ let learning h c =
 
 
 (* Donne le littéral de plus gros score (min_elt car on a pris l'opposé de compare dans Types.Lit) *)
-let next h pos current =
+let next h pos current solution wl =
 	snd (min_elt h.sort)
 
 

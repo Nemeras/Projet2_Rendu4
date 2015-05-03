@@ -42,7 +42,7 @@ let backtrack_step stack solver current pos heuristic solution levels orders k p
 			begin
 			k := - !k ;
 			para.level <- para.level + 1 ;
-			solution.(abs !k) <- 2*(abs !k)/ !k ;
+			solution.(abs !k) <- 2*((abs !k)/ !k) ;
 			solution.(0) <- T.update solver !k ;
 			H.update heuristic !k ;
 			let _ = C.update !k stack current pos solution in

@@ -1,0 +1,16 @@
+### Starting build.
+# Target: unsat.ml.depends, tags: { extension:ml, file:unsat.ml, ocaml, ocamldep, quiet }
+/usr/local/bin/ocamldep.opt -modules unsat.ml > unsat.ml.depends
+# Target: clause.ml.depends, tags: { extension:ml, file:clause.ml, ocaml, ocamldep, quiet }
+/usr/local/bin/ocamldep.opt -modules clause.ml > clause.ml.depends # cached
+# Target: clause.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:clause.cmo, file:clause.ml, implem, ocaml, quiet }
+/usr/local/bin/ocamlc.opt -c -o clause.cmo clause.ml # cached
+# Target: unsat.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:unsat.cmo, file:unsat.ml, implem, ocaml, quiet }
+/usr/local/bin/ocamlc.opt -c -o unsat.cmo unsat.ml
+# Target: clause.cmx, tags: { compile, extension:cmx, extension:ml, file:clause.cmx, file:clause.ml, implem, native, ocaml, quiet }
+/usr/local/bin/ocamlopt.opt -c -o clause.cmx clause.ml # cached
+# Target: unsat.cmx, tags: { compile, extension:cmx, extension:ml, file:unsat.cmx, file:unsat.ml, implem, native, ocaml, quiet }
+/usr/local/bin/ocamlopt.opt -c -o unsat.cmx unsat.ml
+# Target: unsat.native, tags: { dont_link_with, extension:native, file:unsat.native, link, native, ocaml, program, quiet }
+/usr/local/bin/ocamlopt.opt clause.cmx unsat.cmx -o unsat.native
+# Compilation successful.

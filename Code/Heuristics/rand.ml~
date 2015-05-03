@@ -34,7 +34,7 @@ let learning h c =
 	()
 
 
-let next h pos current wl =
+let next h pos current solution wl =
 	let n = ref (Random.int h.nbr) in
 	let i = ref 1 in
 	while !n <> 0 || h.taken.(!i) do
@@ -42,7 +42,6 @@ let next h pos current wl =
 			decr n ;
 		incr i
 	done ;
-	print_int !i ; print_newline () ;
 	if Random.bool () then
 		!i
 	else

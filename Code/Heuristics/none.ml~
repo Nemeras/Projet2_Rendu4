@@ -35,8 +35,18 @@ let backtrack h x =
 let learning h c =
 	()
 
-let next h pos current =
-	h.k
+let next h pos current wl =
+	(*h.k*)
+	let i = ref 1 in
+	while fst h.sol.(!i) do
+		incr i
+	done ;
+	!i
 
 let is_instanciation_full h =
-	h.k = Array.length h.sol - 1
+	(*h.k = Array.length h.sol - 1*)
+	let i = ref 1 in
+	while fst h.sol.(!i) do
+		incr i
+	done ;
+	!i = Array.length h.sol - 1

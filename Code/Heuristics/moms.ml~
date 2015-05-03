@@ -51,28 +51,30 @@ let next h pos current wl =
 	in
 	let mini = ref max_int in
 	for i = 0 to current.length - 1 do
-		if List.length current.a.(i) < !mini then
+		let l = List.length current.a.(i) in
+		if l < !mini then
 			begin
-			mini := List.length current.a.(i) ;
+			mini := l ;
 			Array.fill pos_min 0 n (0,0) ;
 			end ;
-		if List.length current.a.(i) = !mini then
+		if l = !mini then
 			aux current.a.(i) ;
 	done ;
 	let lit_max = ref 0 in
 	let maxi = ref 0 in
 	for i = 1 to n do
-		if fst pos_min.(i) > !maxi then
+		if not h.taken.(i) && fst pos_min.(i) > !maxi then
 			begin
 			maxi := fst pos_min.(i) ;
 			lit_max := i
 			end ;
-		if snd pos_min.(i) > !maxi then
+		if not h.taken.(i) && snd pos_min.(i) > !maxi then
 			begin
 			maxi := snd pos_min.(i) ;
 			lit_max := -i
-			end ;
+			end
 	done ;
+	print_int !lit_max ; print_newline () ;
 	if !lit_max <> 0 then
 		!lit_max
 	else

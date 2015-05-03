@@ -37,7 +37,7 @@ let next_free h =
 	!i
 
 
-let next_wl pos current =
+let next_wl pos current h =
 	let n = Array.length pos - 1 in
 	let pos_real = Array.make (n+1) (0,0) in
 	let rec aux c =
@@ -56,12 +56,12 @@ let next_wl pos current =
 	let lit_max = ref 0 in
 	let maxi = ref 0 in
 	for i = 1 to n do
-		if fst pos_real.(i) > !maxi then
+		if not h.taken.(i) && fst pos_real.(i) > !maxi then
 			begin
 			maxi := fst pos_real.(i) ;
 			lit_max := i
 			end ;
-		if snd pos_real.(i) > !maxi then
+		if not h.taken.(i) && snd pos_real.(i) > !maxi then
 			begin
 			maxi := snd pos_real.(i) ;
 			lit_max := -i
@@ -69,18 +69,18 @@ let next_wl pos current =
 	done ;
 	!lit_max
 
-let next_basic pos =
+let next_basic pos h =
 	let n = Array.length pos - 1 in
 	let new_pos = Array.map (fun (l1,l2) -> (List.length l1, List.length l2)) pos in
 	let lit_max = ref 0 in
 	let maxi = ref 0 in
 	for i = 1 to n do
-		if fst new_pos.(i) > !maxi then
+		if not h.taken.(i) && fst new_pos.(i) > !maxi then
 			begin
 			maxi := fst new_pos.(i) ;
 			lit_max := i
 			end ;
-		if snd new_pos.(i) > !maxi then
+		if not h.taken.(i) && snd new_pos.(i) > !maxi then
 			begin
 			maxi := snd new_pos.(i) ;
 			lit_max := -i
@@ -92,9 +92,9 @@ let next_basic pos =
 let next h pos current wl =
 	let lit_max =
 		if wl then
-			next_wl pos current
+			next_wl pos current h
 		else
-			next_basic pos
+			next_basic pos h
 	in
 	if lit_max = 0 then
 		next_free h
