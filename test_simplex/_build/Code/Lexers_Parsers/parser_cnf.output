@@ -1,0 +1,81 @@
+   0  $accept : %entry% $end
+
+   1  cnf : INIT
+   2      | cnf clause
+
+   3  clause : LIT clause
+   4         | EOC
+
+   5  %entry% : '\001' cnf
+
+state 0
+	$accept : . %entry% $end  (0)
+
+	'\001'  shift 1
+	.  error
+
+	%entry%  goto 2
+
+
+state 1
+	%entry% : '\001' . cnf  (5)
+
+	INIT  shift 3
+	.  error
+
+	cnf  goto 4
+
+
+state 2
+	$accept : %entry% . $end  (0)
+
+	$end  accept
+
+
+state 3
+	cnf : INIT .  (1)
+
+	.  reduce 1
+
+
+state 4
+	cnf : cnf . clause  (2)
+	%entry% : '\001' cnf .  (5)
+
+	LIT  shift 5
+	EOC  shift 6
+	$end  reduce 5
+
+	clause  goto 7
+
+
+state 5
+	clause : LIT . clause  (3)
+
+	LIT  shift 5
+	EOC  shift 6
+	.  error
+
+	clause  goto 8
+
+
+state 6
+	clause : EOC .  (4)
+
+	.  reduce 4
+
+
+state 7
+	cnf : cnf clause .  (2)
+
+	.  reduce 2
+
+
+state 8
+	clause : LIT clause .  (3)
+
+	.  reduce 3
+
+
+7 terminals, 4 nonterminals
+6 grammar rules, 9 states
