@@ -5,31 +5,39 @@ open General
 open Tseitin
 open List
 
+
 		(** TYPES UTILISES **)
 
 
-type atom =	(* Egalité ou diségalité de deux variables *)
-	| Eq of ((int*int) list)*int
-	| Geq of ((int*int) list)*int
-	| Leq of ((int*int) list)*int
-	| Ineq of ((int*int) list)*int
-  
-type change =
-	| AddIneq of int*int*int	(* Littéral correspondant, x1, x2 où l'instanciation donne x1 != x2 *)
-	| AddEq of int*int*int*int*int	(* Littéral, x1, x2, y1, y2 où *)
+type atom =	
+	| Eq of int*Num.num
+	| Geq of int*Num.num
+	| Leq of int*Num.num
+	| Dis of int*Num.num
 
-type uf = (int*int) array	(* Structure d'union find : (père, taille de l'arbre) *)
-		  
-type ineqs = (int*int) list	(* Liste des inégalités *)
+type change =
+	|Test
+
+type rescheck=
+	|Satisf
+	|Unsatisf;;
 
 type stack = change list	(* Pile des modifications au fil des instanciations dans DPLL *)
   
-  
+type instanciation = Num.num array  
+
+type bound = Num.num*Num.num
+
+type constraint_matrix = (Num.num array) array
+
 type struc = {
-	aa : atom array ;		(* Associe à une variable l'atome correspondant *)
-	eq : uf ;
-	mutable ineq : ineqs ;
-	mutable st : stack ;
+	aa : atom array;		(* Associe à une variable l'atome correspondant *)
+	mutable bl : int list;
+	mutable nbl : int list;
+	mutable cm : constraint_matrix;
+	mutable inst : instanciation;
+	mutable ba : bound array;
+	mutable st : stack;
 	mutable unsat : Cnf.clause	(* Clause expliquant la contradiction levée par le solveur *)
 }
 	   
@@ -37,12 +45,17 @@ type struc = {
 
 
 		(** LECTURE DES FICHIERS **)
+let fun_sort = (fun k l -> compare (snd k) (snd l)) ;;
+let fun_sort2 = compare;;
 
+let compare_n a b =
+match a,b with
+|(_,rat,_),(_,rat2,_) -> Num.compare_num rat rat2;;
 
 module Atom =
 	struct
-		type t = int * int
-		let compare = compare
+		type t = ((int*int) list)*Num.num*int
+		let compare = compare_n
 	end
 
 module KeyAtom = Map.Make (Atom)
@@ -54,14 +67,66 @@ open KeyAtom
 (* Construit la Map associant à chaque atome sa variable dans DPLL
    Renvoie la liste de formules dans laquelle on a remplacé les atomes par leurs variables et un tableau
    représentant la fonction inverse de la Map construite                                                 *)
-let analyze form_list =
+
+
+let rec max_vaux lis nbl=
+match lis with
+|[] -> 0;
+|h::t -> nbl:=(snd h)::!nbl; max (snd h) (max_vaux t nbl);;
+
+
+let rec max_v form_list nbl=
+match form_list with
+|Not(fl,_) -> max_v fl nbl
+|And(fl1,fl2,_) -> max (max_v fl1 nbl) (max_v fl2 nbl)
+|Or(fl1,fl2,_) -> max (max_v fl1 nbl) (max_v fl2 nbl)
+|Lit(atom,_) -> let (lis,_,_) = atom in max_vaux lis nbl;;
+
+let rec maxv form_list nbl =
+match form_list with
+|h::t -> max (max_v h nbl) (maxv t nbl);
+|[] -> 0;;
+
+let rec analyze_aux ato bl numerotage con_add=
+let (lis,rat,k) =ato in
+numerotage:=!numerotage+1;
+bl:=(!numerotage)::(!bl);
+con_add:=((lis,!numerotage)::!con_add);
+([1,!numerotage],rat,k);;
+
+let rec analyze_rec2 forml bl nbl numerotage con_add=
+match forml with
+|Not(fl,v) -> Not(analyze_rec2 fl bl nbl numerotage con_add,v)
+|And(fl1,fl2,v) -> And(analyze_rec2  fl1 bl nbl numerotage con_add, analyze_rec2  fl2 bl nbl numerotage con_add,v)
+|Or(fl1,fl2,v) -> Or(analyze_rec2  fl1 bl nbl numerotage con_add,analyze_rec2 fl2 bl nbl numerotage con_add,v)
+|Lit(ato,v) -> Lit(analyze_aux ato bl numerotage con_add ,v);;
+
+let rec analyze_rec forml bl nbl numerotage con_add=
+match forml with
+|[] -> [];
+|[h] -> [analyze_rec2 h bl nbl numerotage con_add]
+|h::t -> (analyze_rec2 h bl nbl numerotage con_add )::(analyze_rec t bl nbl numerotage con_add);;
+
+let analyze_beginning form_list =
+let bas_list = ref [] in
+let nbas_list = ref [] in
+let maxva = maxv form_list nbas_list in
+let numerotage = ref maxva in
+let con_add = ref [[Num.num_of_int 0,0],-1] in
+let new_form = analyze_rec form_list nbas_list bas_list numerotage con_add in
+let new_bas_list = Sort.sort_uniq fun_sort2 (List.map Num.int_of_num !bas_list) in
+nbas_list := Sort.sort_uniq fun_sort2 !nbas_list;
+new_form,!con_add,new_bas_list,!nbas_list;;
+
+let analyze form_l =
+  let form_list,con_add,bas_list,nbas_list = analyze_beginning form_l in
 	let m = ref empty in
 	let rec aux f =
 		match f with
-		| Lit ((x,y), v) when mem (min x y, max x y) !m ->
-			Lit (find (min x y, max x y) !m, v)
-		| Lit ((x,y), v) ->
-			m := add (min x y, max x y) (cardinal !m + 1) !m ;
+		| Lit ((x,y,z), v) when mem (x,y,z) !m ->
+			Lit (find (x,y,z) !m, v)
+		| Lit ((x,y,z), v) ->
+			m := add (x,y,z) (cardinal !m + 1) !m ;
 			Lit (cardinal !m, v)
 		| And (f1, f2, v) ->
 			And (aux f1, aux f2, v)
@@ -71,27 +136,18 @@ let analyze form_list =
 			Not (aux f, v)
 	in
 	let f0 = List.map aux form_list in
-	let aa = Array.make (cardinal !m + 1) (Eq (0,0)) in
+	let aa = Array.make (cardinal !m + 1) (Eq(0, Num.num_of_int 0)) in
 	while !m <> empty do
-		let (x,y), i = choose !m in
-		m := remove (x,y) !m ;
-		if x >= 0 then
-			aa.(i) <- Eq (x,y)
-		else
-			aa.(i) <- Ineq (-x-1,-y-1)
+		let (x,y,z), i = choose !m in
+		m := remove (x,y,z) !m ;
+		match x,y,z with
+		|[_,x],y,z when z=1 -> aa.(i) <- Eq(x,y);
+		|[_,x],y,z when z=2 -> aa.(i) <- Leq(x,y);
+		|[_,x],y,z when z=3 -> aa.(i) <- Geq(x,y);
+		|[_,x],y,z when z=4 -> aa.(i) <- Dis(x,y);
 	done ;
-	f0, aa
+	f0,aa,con_add,bas_list,nbas_list
 
-
-(* Renvoie l'indice de variable (dans les atomes) maximal *)
-let max_var aa =
-	let maxv = ref 0 in 
-	for i=0 to Array.length aa - 1 do
-		match aa.(i) with
-		| Eq (x,y) -> maxv := max !maxv (max x y) ;
-		| Ineq (x,y) -> maxv := max !maxv (max x y) ;
-	done ;
-	!maxv
 
 
 (* Lit un fichier *)
@@ -106,22 +162,34 @@ let lexstr s =
 
 (* Parse un fichier contenant des formules logiques quelconques *)
 let parse file =
-	Parser_equ.formula Lexer_equ.token (lexbuf file)
+	Parser_simplex.formula Lexer_simplex.token (lexbuf file)
 
 
 (* Parse une CNF dans une chaîne de caractères *)
 let parse_cnf s =
 	Parser_cnf.cnf Lexer_cnf.token (lexstr s)
 
+let create_con_m con_add bas_list nbas_list=
+let cm = Array.make_matrix (List.length nbas_list) (List.length bas_list) (Num.num_of_int 0) in
+cm;;
+
+let rec maxlist liste =
+match liste with
+|[]->0;
+|h::t -> max h (maxlist t);;
 
 let create file aff_cnf =
 	try
 		let f = parse file in
-		let f0, aa = analyze f in
+		let f0, aa,con_add,bas_list,nbas_list = analyze f in
+		let cm = create_con_m con_add bas_list nbas_list in
 		let solver = {
-			aa = aa ;
-			eq = Array.init (1 + max_var aa) (fun i -> (i,1)) ;
-			ineq = [] ;
+			aa = aa;
+			ba = Array.make (List.length bas_list) (Num.num_of_string "-1/0",Num.num_of_string "1/0");
+			inst = Array.make (max (maxlist nbas_list) (maxlist bas_list)) (Num.num_of_int 0);
+			cm = cm;
+			nbl = nbas_list;
+			bl = bas_list;
 			st = [] ;
 			unsat = []
 		} in
@@ -134,34 +202,12 @@ let create file aff_cnf =
 			end ;
 		let cnf = parse_cnf s in
 		cnf, solver
-	with _ -> (failwith "Erreur de saisie")
+	with _ -> (failwith "Erreur de saisie");;
 
 
 
 
-		(** MANIPULATION DE L'UNION-FIND **)
 
-
-(* Structure d'union-find classique, avec pondération par la taille des arbres.
-   On n'a pas fait d'opérations de compression, pour préserver la structure et pouvoir faire des backtracks. *)
-
-let rec find n aa =
-	match fst (aa.(n)) with
-	| x when x = n -> x
-	| x -> find x aa
-
-
-let union x y aa lit =
-	match aa.(find x aa), aa.(find y aa) with
-	| (a,_), (b,_) when a = b -> AddEq (lit,a,b,a,b)
-	| (a,sza), (b,szb) when sza > szb ->
-		aa.(b) <- (a, szb) ;
-		aa.(a) <- (a, sza+szb) ;
-		AddEq (lit,x,y,b,a)
-	| (a,sza), (b,szb) ->
-		aa.(a) <- (b, sza) ;
-		aa.(b) <- (b, sza+szb) ;
-		AddEq (lit,x,y,a,b)
 
 
 
@@ -170,110 +216,90 @@ let union x y aa lit =
 
 
 (* Choisit la modification à apporter à la structure selon la nature de l'instanciation *)
-let modif struc lit =
-	match struc.aa.(abs lit) with
-	| Eq (x,y) when lit > 0 ->
-		union x y struc.eq lit
-	| Eq (x,y) ->
-		struc.ineq <- (x,y)::struc.ineq ;
-		AddIneq (lit, x, y)
-	| Ineq (x,y) when lit > 0 ->
-		struc.ineq <- (x, y)::struc.ineq ;
-		AddIneq (lit, x, y)
-	| Ineq (x,y) ->
-		union x y struc.eq lit
+let modif struc lit = ();;
 
 
-(* S'il n'y a pas de contradiction, renvoie (0,0).
-   Sinon, renvoie (x,y), où x != y est l'inégalité qui vient contredire une égalité *)
+
+
+
+let rec parcours liste x =
+match liste with
+|h::t when h=x -> parcours t x
+|h::t -> h::(parcours t x)
+|[] -> [];;
+ 
+
+let remove_l r s struc =
+struc.bl <- parcours struc.bl r;
+struc.nbl <- parcours struc.nbl s;
+struc.bl <- Sort.sort_uniq fun_sort2 (s::struc.bl);
+struc.nbl <- Sort.sort_uniq fun_sort2 (r::struc.nbl);;
+
+let pivot r s struc= 
+remove_l r s struc;;
+
+let rec update_alg_aux i v struc=
+match struc.bl with
+|h::t -> struc.inst.(h) <- (struc.inst.(h)) (Num.+/) ((v Num.-/ struc.inst.(i)) Num.*/ struc.cm.(h).(i));
+|[] -> ();;
+
+let update_alg i v struc=
+update_alg_aux i v struc;
+struc.inst.(i)<-v;;
+
+
+let rec pivot_update_aux liste i j struc theta=
+match liste with
+|[] -> ();
+|h::t when h = i-> pivot_update_aux t i j struc theta;
+|h::t -> struc.inst.(h) <- struc.inst.(h) Num.+/ theta Num.*/ struc.cm.(h).(j);pivot_update_aux t i j struc theta;; 
+
+let pivotandupdate i j v struc=
+  let theta =(v Num.-/ struc.inst.(i)) Num.// (struc.cm.(i).(j)) in
+  struc.inst.(i) <- v;
+  struc.inst.(j) <- struc.inst.(j) Num.+/ theta;
+  pivot_update_aux (struc.bl) i j struc theta;
+  pivot i j struc;;
+  
+
+let rec check_aux_aux1 loop sat liste struc i =
+match liste with
+|[]-> sat:=false;loop:=false;
+|x::t when ((struc.cm.(i).(x) >/ (Num.num_of_int 0)) && (struc.inst.(x) </ snd (struc.ba.(x)))) || ((struc.cm.(i).(x) </ (Num.num_of_int 0))  && (struc.inst.(x) > fst (struc.ba.(x)))) -> pivotandupdate i x (fst (struc.ba.(i))) struc;
+|x::t -> check_aux_aux1 loop sat t struc i;;
+
+let rec check_aux_aux2 loop sat liste struc i =
+match liste with
+|[]-> sat:=false;loop:=false;
+|x::t when ((struc.cm.(i).(x) </ (Num.num_of_int 0)) && (struc.inst.(x) </ snd (struc.ba.(x)))) || ((struc.cm.(i).(x) >/ (Num.num_of_int 0))  && (struc.inst.(x) > fst (struc.ba.(x)))) -> pivotandupdate i x (fst (struc.ba.(i))) struc;
+|x::t -> check_aux_aux1 loop sat t struc i;;
+
+let rec check_aux loop sat liste struc= 
+match liste with
+|[] -> sat:=true;
+|x::t when struc.inst.(x) < fst struc.ba.(x) -> check_aux_aux1 loop sat struc.nbl struc x;
+|x::t when struc.inst.(x) > snd struc.ba.(x) -> check_aux_aux2 loop sat struc.nbl struc x;
+|x::t -> check_aux loop sat t struc;;
+
+
+
 let check_unsat struc =
-	let rec aux l aa =
-		match l with
-		| (x,y)::_ when find x aa = find y aa -> (x,y)
-		| (x,y)::t -> aux t aa
-		| [] -> (0,0)
-	in
-	aux struc.ineq struc.eq
+let loop = ref true in
+let sat = ref false in
+while !loop do
+	begin
+	check_aux loop sat struc.bl struc;
+	end
+done;
+!sat;;
+	
 
-
-(* Recherche le littéral responsable de l'affectation correspondant à x != y *)
-let rec search_i st x y =
-	match st with
-	| AddEq _ :: t -> search_i t x y
-	| AddIneq (lit, a, b) :: t when a = x && b = y -> lit
-	| AddIneq _ ::t -> search_i t x y
-	| [] -> failwith "Problème dans search_i"
-
-
-(* Trouve un chemin dans le graphe représenté par les listes d'adjacence adj de start vers end_e *)
-let path adj start end_e =
-	let liste_visit = ref [start] in
-	let current = ref (start,0) in
-	let prev = ref [0,0] in
-	while fst !current != end_e do 
-		if adj.(fst !current) = [] then
-			begin
-			if !prev = [0,0] then
-				failwith "Pas de chemin" ;
-			current := hd !prev ;
-			prev := tl !prev ;
-			adj.(fst !current) <- tl adj.(fst !current)
-			end
-		else
-			begin
-			if List.exists (fun i -> i = fst (hd adj.(fst !current))) !liste_visit then
-	  			begin
-	   			adj.(fst !current) <- tl adj.(fst !current)
-	 			end
-			else
-	 			begin
-				prev := !current :: !prev ;
-				current := hd adj.(fst !current) ;
-				liste_visit := (fst !current) :: !liste_visit
-				end
-			end
-	done ;
-	tl (tl (rev (!current :: !prev)))
-
-
-(* Construit le graphe des égalités données par DPLL, dans les listes d'adjacence du tableau adj *)
-let rec build_adj stack adj =
-	match stack with
-	| AddIneq _ ::t -> build_adj t adj
-	| AddEq (lit,x,y,a,b) ::t ->
-		adj.(x) <- (y,lit)::adj.(x) ;
-		adj.(y) <- (x,lit)::adj.(y) ;
-		build_adj t adj
-	| [] -> ()
-
-
-(* Prend en compte l'instanciation de lit à vrai dans la structure *)
 let update struc lit =
-	(* On n'agit que si lit correspond à un atome *)
+(*	(* On n'agit que si lit correspond à un atome *)
 	if abs lit < Array.length struc.aa then
-		begin
-		struc.st <- (modif struc lit)::struc.st ;	(* Modification de la structure *)
-		let check = check_unsat struc in
-		if check = (0,0) then
-			0
-		else
-			(* Construction de la clause expliquant la contradiction *)
-			begin
-			let x, y = check in
-			let lit = search_i struc.st x y in
-			(* Construction du graphe des égalités *)
-			let adj = Array.make (Array.length struc.eq) [] in
-			build_adj struc.st adj ;
-			(* Chemin d'égalités de x vers y *)
-			let list_edges = path adj x y in
-			let clause = List.map (fun (a,b) -> -b) list_edges in
-			(* Or, on a voulu supposer x != y, d'où l'explication de la contradiction *)
-			struc.unsat <- -lit::clause ;
-			-max_int
-			end
-		end
+		
 	else
-		0
+		0*)();;
 
 
 
@@ -281,21 +307,8 @@ let update struc lit =
 
 
 (* Annule la dernière affectation, si elle correspond à un atome *)
-let backtrack struc lit =
-	if abs lit < Array.length struc.aa then
-		begin
-		let last_change = hd struc.st in
-		struc.st <- tl struc.st ;
-		match last_change with
-		| AddEq (lit,x,y,rx,ry) when rx = ry -> ()
-		| AddEq (lit,x,y,rx,ry) ->
-			let a,sz = struc.eq.(rx) in
-			struc.eq.(rx) <- rx, sz ;
-			let b,szb = struc.eq.(ry) in 
-			struc.eq.(ry) <- ry, szb-sz
-		| AddIneq (_) ->
-			struc.ineq <- tl struc.ineq
-		end
+let backtrack struc lit =();;
+
 
 
 
@@ -313,39 +326,7 @@ let unsat struc =
 
 
 (* Trouve une instanciation pour la i-ème variable *)
-let color instanciation solver i =
-	let rec color_aux i =
-		match solver.eq.(i) with
-		| j, _ when j = i || instanciation.(i) != i ->
-			(* Si la variable est son propre représentant ou a déjà été instanciée, on garde i *)
-			instanciation.(i)
-		| j, _ ->
-			(* Sinon, on cherche l'instanciation de son représentant *)
-			let c = color_aux j in
-			instanciation.(i) <- c ;
-			solver.eq.(i) <- i, 0 ;
-			c
-	in
-	let _ = color_aux i in
-	()
 
 
 (* Si l'ensemble de formules est satisfiables, renvoie une affectation des variables dans N correspondante *)
-let find_instanciation solver =
-	let l = Array.length solver.eq in
-	let instanciation = Array.init l (fun i -> i) in
-	for i = 0 to l - 1 do
-		(* Il suffit de parcourir les variables et de faire en sorte qu'un classe d'équivalence soit instanciée de la même façon *)
-		color instanciation solver i ;
-		Printf.printf "x%d = %d\n" i instanciation.(i)
-	done
-	
 
-
-let print_solution res solver =
-	match res with
-	| Cnf.False ->
-		print_string "s UNSATISFIABLE\n"
-	| Cnf.True _ ->
-		print_string "s SATISFIABLE\n" ;
-		find_instanciation solver

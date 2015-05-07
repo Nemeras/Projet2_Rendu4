@@ -39,7 +39,7 @@ let _ =
 	let theory = ref 0 in		(* Numéro de la théorie utilisée *)
 	let heuristic = ref 0 in
 	
-	let options = [
+	let options = [ 
 		("-wl", Arg.Set wl, "Active les littéraux surveillés.") ;
 		("-cl", Arg.Set learning, "Active l'apprentissage de clauses.") ;
 		("-cl-interac", Arg.Unit (fun () -> learning := true ; draw := true), "Active l'apprentissage de clauses et le mode interactif.") ;
@@ -50,6 +50,7 @@ let _ =
 		("-explainunsat", Arg.Unit (fun () -> learning := true ; unsat := true), "Active la preuve de l'insatisfiabilité.") ;
 		("-tseitin", Arg.Unit (fun () -> theory := 1), "Lit une formule logique quelconque.") ;
 		("-equality", Arg.Unit (fun () -> theory := 2), "Solveur sur la théorie de l'égalité.") ;
+		("-simplex", Arg.Unit (fun () -> theory := 3), "Solveur sur la théorie de l'arithmétique linéaire") ;
 		("-print", Arg.Set print, "Active l'affichage des étapes intermédiaires de l'algorithme.") ;
 		("-cnf", Arg.Set cnf, "Active l'affichage de la cnf étudiée dans DPLL.")
 	] in
@@ -65,4 +66,3 @@ let _ =
 	let module T = (val (choose_theory !theory) : Theory) in	(* Théorie utilisée *)
 	let module Launch = Init_theory (T) in
 	Launch.init !file !wl !learning !heuristic !draw !unsat !print !cnf	(* Lancement de l'algorithme *)
-	
