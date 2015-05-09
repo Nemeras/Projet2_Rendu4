@@ -1,5 +1,5 @@
 all :
-	ocamlbuild -yaccflag -v -lib unix -Is Code/DPLL,Code/General,Code/Lexers_Parsers,Code/Theories,Code/Heuristics Code/main.native
+	ocamlbuild -yaccflag -v -lib unix -lib nums -Is Code/DPLL,Code/General,Code/Lexers_Parsers,Code/Theories,Code/Heuristics Code/main.native
 	ln -fs main.native resol
 
 byte :

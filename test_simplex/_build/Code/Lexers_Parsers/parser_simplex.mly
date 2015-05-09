@@ -1,11 +1,12 @@
 %{
-open General.Tseitin
+open General.Tseitin;;
+open Num;;
 %}
 
 %token <int> VAR	/* Indice de variable */
 %token <Num.num> RAT
 %token LPAREN RPAREN
-%token EQU DIS LEQ GEQ PLUS
+%token EQU DIS LEQ GEQ LT GT PLUS
 %token IMPLY AND OR
 %token NOT
 %token EOF		/* Fin de fichier */
@@ -16,7 +17,7 @@ open General.Tseitin
 %nonassoc NOT
 
 %start formula
-%type <(((Num.num*int) list) *Num.num*int) General.Tseitin.formula list> formula	
+%type <(((Num.num*int) list) *(Num.num*Num.num)*int) General.Tseitin.formula list> formula	
 %%
 
 formula:
@@ -26,18 +27,27 @@ formula:
 
 
 form:
-	| atom			{ Lit ($1, 0) }
+	| atom1			{ Lit ($1, 0) }
+	| atom2			{ $1 }
+	| atom3	        	{ $1 }
 	| LPAREN form RPAREN	{ $2 }
 	| NOT form		{ Not ($2,0) }
 	| form OR form		{ Or ($1, $3, 0) }
 	| form AND form		{ And ($1, $3, 0) }
 	| form IMPLY form	{ Or (Not ($1,0), $3, 0) }
 ;
-atom:
- 	| sum EQU RAT		{ ($1,$3,1) }
-	| sum LEQ RAT		{ ($1,$3,2) }
-	| sum GEQ RAT 		{ ($1,$3,3) }
-	| sum DIS RAT		{ ($1,$3,4) }
+atom1:
+	| sum LEQ RAT		{ ($1,($3,Num.num_of_int 0),1) }
+	| sum GEQ RAT 		{ ($1,($3,Num.num_of_int 0),2) }
+	| sum LT RAT		{ ($1,($3,Num.num_of_string "-1"),3) }
+	| sum GT RAT 		{ ($1,($3,Num.num_of_int 1),4) }
+
+;
+atom2:
+	| sum DIS RAT		{ Or(Lit(($1,($3,Num.num_of_string "-1"),3),0), Lit(($1,($3,Num.num_of_int 1),4),0),0) }
+;
+atom3:
+ 	| sum EQU RAT		{ And(Lit(($1,($3,Num.num_of_int 0),1),0),Lit(($1,($3,Num.num_of_int 0),2),0),0) }
 ;
 sum:
 	|RAT VAR PLUS sum	{ ($1,$2)::$4 }

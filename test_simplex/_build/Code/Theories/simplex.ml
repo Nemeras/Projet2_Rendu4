@@ -10,13 +10,29 @@ open Num
 
 
 type atom =	
-	| Eq of int*num
-	| Geq of int*num
-	| Leq of int*num
-	| Dis of int*num
+	| Lt of int*(num*num)
+	| Geq of int*(num*num)
+	| Leq of int*(num*num)
+	| Gt of int*(num*num);;
+  
+type atochange =(num*num)*(num*num);;
+
+
+type bound = (num*num)*(num*num)
+
+type instanciation = num array  
+
+type change_aux =
+  |Low of int*num
+  |LowS of int*num
+  |Upp of int*num
+  |UppS of int*num
 
 type change =
-	|Test
+  |Nothing of change_aux
+  |Something of (instanciation*(bound array))*change_aux*int
+
+type disequality = int*num;;
 
 type rescheck=
 	|Satisf
@@ -24,9 +40,8 @@ type rescheck=
 
 type stack = change list	(* Pile des modifications au fil des instanciations dans DPLL *)
   
-type instanciation = num array  
 
-type bound = num*num
+
 
 type constraint_matrix = (num array) array
 
@@ -50,11 +65,15 @@ let fun_sort2 = compare;;
 
 let compare_n a b =
 match a,b with
-|(_,rat,_),(_,rat2,_) -> compare rat rat2;;
+|(_,(rat,_),_),(_,(rat2,_),_) -> compare_num rat rat2;;
+
+let compare_n2 a b =
+match a,b with
+|(n1,_),(n2,_) -> compare n1 n2;;
 
 module Atom =
 	struct
-		type t = ((int*int) list)*num*int
+		type t = ((int*int) list)*(num*num)*int
 		let compare = compare_n
 	end
 
@@ -80,7 +99,7 @@ match form_list with
 |Not(fl,_) -> max_v fl nbl
 |And(fl1,fl2,_) -> max (max_v fl1 nbl) (max_v fl2 nbl)
 |Or(fl1,fl2,_) -> max (max_v fl1 nbl) (max_v fl2 nbl)
-|Lit(atom,_) -> let (lis,_,_) = atom in max_vaux lis nbl;;
+|Lit(ato,_) -> let (lis,_,_) = ato in max_vaux lis nbl;;
 
 let rec maxv form_list nbl =
 match form_list with
@@ -136,15 +155,15 @@ let analyze form_l =
 			Not (aux f, v)
 	in
 	let f0 = List.map aux form_list in
-	let aa = Array.make (cardinal !m + 1) (Eq(0, num_of_int 0)) in
+	let aa = Array.make (cardinal !m + 1) (Leq(0, (num_of_int 0,num_of_int 0))) in
 	while !m <> empty do
 		let (x,y,z), i = choose !m in
 		m := remove (x,y,z) !m ;
 		match x,y,z with
-		|[_,x],y,z when z=1 -> aa.(i) <- Eq(x,y);
-		|[_,x],y,z when z=2 -> aa.(i) <- Leq(x,y);
-		|[_,x],y,z when z=3 -> aa.(i) <- Geq(x,y);
-		|[_,x],y,z when z=4 -> aa.(i) <- Dis(x,y);
+		|[_,x],y,z when z=1 -> aa.(i) <- Leq(x,y);
+		|[_,x],y,z when z=2 -> aa.(i) <- Geq(x,y);
+		|[_,x],y,z when z=3 -> aa.(i) <- Leq(x,y);
+		|[_,x],y,z when z=4 -> aa.(i) <- Geq(x,y);
 	done ;
 	f0,aa,con_add,bas_list,nbas_list
 
@@ -168,6 +187,15 @@ let parse file =
 (* Parse une CNF dans une chaîne de caractères *)
 let parse_cnf s =
 	Parser_cnf.cnf Lexer_cnf.token (lexstr s)
+let rec con_m_aux_aux lis num cm =
+match lis with
+|[] -> ();
+|h::t ->let (rat,var)=h in cm.(num).(var) <- cm.(num).(var) +/ rat;;
+
+let rec con_m_aux con_add cm =
+match con_add with
+|h::t ->let (lis,num)=h in con_m_aux_aux lis num cm;con_m_aux t cm;
+|[]-> cm;;
 
 let create_con_m con_add bas_list nbas_list=
 let cm = Array.make_matrix (List.length nbas_list) (List.length bas_list) (num_of_int 0) in
@@ -185,7 +213,7 @@ let create file aff_cnf =
 		let cm = create_con_m con_add bas_list nbas_list in
 		let solver = {
 			aa = aa;
-			ba = Array.make (List.length bas_list) (num_of_string "-1/0",num_of_string "1/0");
+			ba = Array.make (List.length bas_list) ((num_of_string "-1/0",num_of_int 0),(num_of_string "1/0",num_of_int 0));
 			inst = Array.make (max (maxlist nbas_list) (maxlist bas_list)) (num_of_int 0);
 			cm = cm;
 			nbl = nbas_list;
@@ -216,18 +244,14 @@ let create file aff_cnf =
 
 
 (* Choisit la modification à apporter à la structure selon la nature de l'instanciation *)
-let modif struc lit = ();;
-
-
-
-
-
 let rec parcours liste x =
 match liste with
 |h::t when h=x -> parcours t x
 |h::t -> h::(parcours t x)
 |[] -> [];;
  
+let save_state struc =
+Array.copy struc.inst,Array.copy struc.ba
 
 let remove_l r s struc =
 struc.bl <- parcours struc.bl r;
@@ -260,28 +284,152 @@ let pivotandupdate i j v struc=
   struc.inst.(j) <- struc.inst.(j) +/ theta;
   pivot_update_aux (struc.bl) i j struc theta;
   pivot i j struc;;
+
+let assertupper i c struc lit=
+if c </ fst (snd struc.ba.(i)) then
+  begin
+    if ((c </ fst (fst struc.ba.(i)))||((c =/ fst (fst struc.ba.(i)))&&((snd (fst struc.ba.(i))) >/ num_of_int 0))) then
+      begin
+	struc.st <- Nothing(Upp(i,c))::struc.st
+      end
+    else
+      begin
+	let save = save_state struc in
+	let (l,_)=struc.ba.(i) in
+	struc.ba.(i) <-(l,(c,num_of_int 0));
+	if List.exists (fun k-> k=i) struc.nbl && struc.inst.(i) >/ c then update_alg i c struc;
+	struc.st<-Something(save,Upp(i,c),lit)::struc.st;
+      end
+  end
+else struc.st <-Nothing(Upp(i,c))::struc.st;;
+
+let assertlower i c struc lit=
+if c >/ fst (fst struc.ba.(i)) then
+  begin
+    if ((c >/ fst (snd struc.ba.(i)))||((c =/ fst (snd struc.ba.(i)))&&((snd (snd struc.ba.(i))) </ num_of_int 0))) then
+      begin
+        struc.st <-Nothing(Low(i,c))::struc.st;
+      end
+    else
+      begin
+        let save = save_state struc in
+	let (_,u)=struc.ba.(i) in
+	struc.ba.(i) <-((c,num_of_int 0),u);
+	if List.exists (fun k-> k=i) struc.nbl && struc.inst.(i) </ c then update_alg i c struc;
+	struc.st <- Something(save,Low(i,c),lit)::struc.st
+      end
+  end
+else struc.st <-Nothing(Low(i,c))::struc.st;;
+
+let assertupperstrict i c struc lit=
+if c </ fst (snd struc.ba.(i)) then
+  begin
+    if (c <=/ fst (fst struc.ba.(i))) then
+      begin
+	struc.st<-Nothing(UppS(i,c))::struc.st
+      end
+    else
+      begin
+	let save = save_state struc in
+	let (l,_)=struc.ba.(i) in
+	struc.ba.(i) <-(l,(c,num_of_string "-1"));
+	if List.exists (fun k-> k=i) struc.nbl && struc.inst.(i) >/ c then update_alg i c struc;
+	struc.st <- Something(save,Upp(i,c),lit)::struc.st
+      end
+  end
+else struc.st<-Nothing(UppS(i,c))::struc.st;;
+
+let assertlowerstrict i c struc lit=
+if c >/ fst (fst struc.ba.(i)) then
+  begin
+    if c <=/ fst (snd struc.ba.(i)) then
+      begin
+	struc.st <-Nothing(LowS(i,c))::struc.st
+      end
+    else
+      begin
+        let save = save_state struc in
+	let (_,u)=struc.ba.(i) in
+	struc.ba.(i) <-((c,num_of_int 1),u);
+	if List.exists (fun k-> k=i) struc.nbl && struc.inst.(i) </ c then update_alg i c struc;
+	struc.st<- Something(save,Low(i,c),lit)::struc.st
+      end
+  end
+else struc.st <- Nothing(LowS(i,c))::struc.st;;
+
+let modif_pos struc lit =
+  match struc.aa.(lit) with
+  |Leq(var,(rat,k)) when k =/ num_of_int 0 -> assertupper var rat struc lit;
+  |Geq(var,(rat,k)) when k =/ num_of_int 0-> assertlower var rat struc lit;
+  |Leq(var,(rat,_)) -> assertupperstrict var rat struc lit;
+  |Geq(var,(rat,_)) -> assertlowerstrict var rat struc lit;
+  |_-> failwith "probleme dans modif : lt ou gt encore present.";;
   
+let modif_neg struc lit =
+  match struc.aa.(lit) with
+  |Leq(var,(rat,k)) when k =/ num_of_int 0 -> assertupperstrict var rat struc (-lit);
+  |Geq(var,(rat,k)) when k =/ num_of_int 0 -> assertlowerstrict var rat struc (-lit);
+  |Leq(var,(rat,_)) -> assertupper var rat struc (-lit);
+  |Geq(var,(rat,_)) -> assertlower var rat struc (-lit);
+  |_-> failwith "probleme dans modif : lt ou gt encore present.";;
+
+
+let modif struc lit = 
+if abs lit = lit then modif_pos struc lit else modif_neg struc lit;;
+
+
+let rec search_stack1 x k struc stack refl=
+match stack with
+|Nothing(_)::t->search_stack1 x k struc t refl;
+|Something(_,Upp(i,c),lit)::t when (i=x)&&(c=k)-> refl:=(-lit)::!refl;search_stack1 x k struc t refl;
+|Something(_,_,_)::t -> search_stack1 x k struc t refl;
+|[] -> ();;
+
+let rec search_stack2 x k struc stack refl=
+match stack with
+|Nothing(_)::t->search_stack1 x k struc t refl;
+|Something(_,Low(i,c),lit)::t when (i=x)&&(c=k)-> refl:=(-lit)::!refl;search_stack2 x k struc t refl;
+|Something(_,_,_)::t -> search_stack1 x k struc t refl;
+|[] -> ();;
+
+
+
+let rec search_np1 struc lis i refl=
+match lis with
+|h::t when (struc.cm.(i).(h) >/ num_of_int 0) -> search_stack1 h (fst (snd struc.ba.(h))) struc struc.st refl; search_np1 struc t i refl
+|[] -> ();;
+
+let rec search_nm1 struc lis i refl=
+match lis with
+|h::t when (struc.cm.(i).(h) </ num_of_int 0) -> search_stack1 h (fst (fst struc.ba.(h))) struc struc.st refl; search_nm1 struc t i refl
+|[] -> ();;
+
+
+
 
 let rec check_aux_aux1 loop sat liste struc i =
 match liste with
-|[]-> sat:=false;loop:=false;
-|x::t when ((struc.cm.(i).(x) >/ (num_of_int 0)) && (struc.inst.(x) </ snd (struc.ba.(x)))) || ((struc.cm.(i).(x) </ (num_of_int 0))  && (struc.inst.(x) > fst (struc.ba.(x)))) -> pivotandupdate i x (fst (struc.ba.(i))) struc;
+|[]-> sat:=false;loop:=false;let refl = ref [0] in search_np1 struc struc.nbl i refl; search_nm1 struc struc.nbl i refl;struc.unsat<- !refl;
+|x::t when ((struc.cm.(i).(x) >/ (num_of_int 0)) && (struc.inst.(x) </ fst (snd (struc.ba.(x))))) || ((struc.cm.(i).(x) </ (num_of_int 0))  && (struc.inst.(x) >/ fst (fst  (struc.ba.(x))))) -> pivotandupdate i x (fst ( fst (struc.ba.(i)))) struc;
 |x::t -> check_aux_aux1 loop sat t struc i;;
 
 let rec check_aux_aux2 loop sat liste struc i =
 match liste with
-|[]-> sat:=false;loop:=false;
-|x::t when ((struc.cm.(i).(x) </ (num_of_int 0)) && (struc.inst.(x) </ snd (struc.ba.(x)))) || ((struc.cm.(i).(x) >/ (num_of_int 0))  && (struc.inst.(x) > fst (struc.ba.(x)))) -> pivotandupdate i x (fst (struc.ba.(i))) struc;
+|[]-> sat:=false;loop:=false;let refl = ref [0] in search_np1 struc struc.nbl i refl; search_nm1 struc struc.nbl i refl; struc.unsat <- !refl;
+|x::t when ((struc.cm.(i).(x) </ (num_of_int 0)) && (struc.inst.(x) </ fst (snd (struc.ba.(x))))) || ((struc.cm.(i).(x) >/ (num_of_int 0))  && (struc.inst.(x) >/ fst (fst (struc.ba.(x))))) -> pivotandupdate i x (fst (fst (struc.ba.(i)))) struc;
 |x::t -> check_aux_aux1 loop sat t struc i;;
 
 let rec check_aux loop sat liste struc= 
 match liste with
 |[] -> sat:=true;
-|x::t when struc.inst.(x) < fst struc.ba.(x) -> check_aux_aux1 loop sat struc.nbl struc x;
-|x::t when struc.inst.(x) > snd struc.ba.(x) -> check_aux_aux2 loop sat struc.nbl struc x;
+|x::t when struc.inst.(x) </ fst (fst struc.ba.(x)) -> check_aux_aux1 loop sat struc.nbl struc x;
+|x::t when struc.inst.(x) >/ fst (snd struc.ba.(x)) -> check_aux_aux2 loop sat struc.nbl struc x;
 |x::t -> check_aux loop sat t struc;;
 
 
+let restore_state bounds instanc struc =
+struc.inst <- instanc;
+struc.ba <- bounds;;
 
 let check_unsat struc =
 let loop = ref true in
@@ -293,13 +441,19 @@ while !loop do
 done;
 !sat;;
 	
+       
 
 let update struc lit =
-(*	(* On n'agit que si lit correspond à un atome *)
-	if abs lit < Array.length struc.aa then
-		
+	(* On n'agit que si lit correspond à un atome *)
+	if (abs lit) < (Array.length struc.aa) then
+	  begin
+	    modif struc lit;
+		if check_unsat struc then 0
+		else
+		    -max_int;
+	  end
 	else
-		0*)();;
+		0;;
 
 
 
@@ -307,7 +461,12 @@ let update struc lit =
 
 
 (* Annule la dernière affectation, si elle correspond à un atome *)
-let backtrack struc lit =();;
+let backtrack struc lit =
+  let last_change = hd struc.st in
+  struc.st <- tl struc.st;
+  match last_change with
+    |Nothing(_) -> ();
+    |Something((i,b),_,_) -> restore_state b i struc;;
 
 
 
@@ -324,9 +483,15 @@ let unsat struc =
 
 		(** AFFICHAGE DE LA SOLUTION **)
 
+let rec print_l_inst lis struc=
+match lis with
+|[] -> Printf.printf "\n"
+|h::t -> Printf.printf "x%d = %s" h (string_of_num (struc.inst.(h)));;
 
-(* Trouve une instanciation pour la i-ème variable *)
-
-
-(* Si l'ensemble de formules est satisfiables, renvoie une affectation des variables dans N correspondante *)
-
+let print_solution res solver =
+	match res with
+	| Cnf.False ->
+		print_string "s UNSATISFIABLE\n"
+	| Cnf.True _ ->
+		print_string "s SATISFIABLE\n" ;
+		print_l_inst solver.bl solver;;

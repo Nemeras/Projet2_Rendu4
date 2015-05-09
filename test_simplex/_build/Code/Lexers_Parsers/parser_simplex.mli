@@ -7,6 +7,8 @@ type token =
   | DIS
   | LEQ
   | GEQ
+  | LT
+  | GT
   | PLUS
   | IMPLY
   | AND
@@ -15,4 +17,4 @@ type token =
   | EOF
 
 val formula :
-  (Lexing.lexbuf  -> token) -> Lexing.lexbuf -> (((Num.num*int) list) *Num.num*int) General.Tseitin.formula list
+  (Lexing.lexbuf  -> token) -> Lexing.lexbuf -> (((Num.num*int) list) *(Num.num*Num.num)*int) General.Tseitin.formula list

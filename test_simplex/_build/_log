@@ -112,7 +112,7 @@
 # Target: Code/Theories/equality.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Code/Theories/equality.cmo, file:Code/Theories/equality.ml, implem, ocaml, quiet }
 /usr/bin/ocamlc -c -I Code/Theories -I Code/Lexers_Parsers -I Code/General -I Code/DPLL -I Code/Heuristics -o Code/Theories/equality.cmo Code/Theories/equality.ml # cached
 # Target: Code/Theories/simplex.ml.depends, tags: { extension:ml, file:Code/Theories/simplex.ml, ocaml, ocamldep, quiet }
-/usr/bin/ocamldep -modules Code/Theories/simplex.ml > Code/Theories/simplex.ml.depends
+/usr/bin/ocamldep -modules Code/Theories/simplex.ml > Code/Theories/simplex.ml.depends # cached
 # Target: Code/Lexers_Parsers/lexer_simplex.mll, tags: { extension:mll, file:Code/Lexers_Parsers/lexer_simplex.mll, lexer, ocaml, ocamllex, quiet }
 /usr/bin/ocamllex -q Code/Lexers_Parsers/lexer_simplex.mll # cached
 # Target: Code/Lexers_Parsers/lexer_simplex.ml.depends, tags: { extension:ml, file:Code/Lexers_Parsers/lexer_simplex.ml, ocaml, ocamldep, quiet }
@@ -126,12 +126,9 @@
 # Target: Code/Lexers_Parsers/lexer_simplex.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Code/Lexers_Parsers/lexer_simplex.cmo, file:Code/Lexers_Parsers/lexer_simplex.ml, implem, ocaml, quiet }
 /usr/bin/ocamlc -c -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/DPLL -I Code/Heuristics -o Code/Lexers_Parsers/lexer_simplex.cmo Code/Lexers_Parsers/lexer_simplex.ml # cached
 # Target: Code/Theories/simplex.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Code/Theories/simplex.cmo, file:Code/Theories/simplex.ml, implem, ocaml, quiet }
-/usr/bin/ocamlc -c -I Code/Theories -I Code/Lexers_Parsers -I Code/General -I Code/DPLL -I Code/Heuristics -o Code/Theories/simplex.cmo Code/Theories/simplex.ml
-+ /usr/bin/ocamlc -c -I Code/Theories -I Code/Lexers_Parsers -I Code/General -I Code/DPLL -I Code/Heuristics -o Code/Theories/simplex.cmo Code/Theories/simplex.ml
-File "Code/Theories/simplex.ml", line 143, characters 2-197:
-Warning 25: bad style, all clauses in this pattern-matching are guarded.
+/usr/bin/ocamlc -c -I Code/Theories -I Code/Lexers_Parsers -I Code/General -I Code/DPLL -I Code/Heuristics -o Code/Theories/simplex.cmo Code/Theories/simplex.ml # cached
 # Target: Code/Theories/Theories.cmo, tags: { byte, extension:cmo, file:Code/Theories/Theories.cmo, ocaml, pack, quiet }
-/usr/bin/ocamlc -pack Code/Theories/base.cmo Code/Theories/empty.cmo Code/Theories/equality.cmo Code/Theories/simplex.cmo -o Code/Theories/Theories.cmo
+/usr/bin/ocamlc -pack Code/Theories/base.cmo Code/Theories/empty.cmo Code/Theories/equality.cmo Code/Theories/simplex.cmo -o Code/Theories/Theories.cmo # cached
 # Target: Code/DPLL/types.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Code/DPLL/types.cmo, file:Code/DPLL/types.ml, implem, ocaml, quiet }
 /usr/bin/ocamlc -c -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/types.cmo Code/DPLL/types.ml # cached
 # Target: Code/DPLL/init.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Code/DPLL/init.cmo, file:Code/DPLL/init.ml, implem, ocaml, quiet }
@@ -223,12 +220,9 @@ touch Code/Heuristics/Heuristics.mli  ; if  /usr/bin/ocamlopt -pack -I Code/Heur
 # Target: Code/Lexers_Parsers/lexer_simplex.cmx, tags: { compile, extension:cmx, extension:ml, file:Code/Lexers_Parsers/lexer_simplex.cmx, file:Code/Lexers_Parsers/lexer_simplex.ml, for-pack(Lexers_Parsers), implem, native, ocaml, quiet }
 /usr/bin/ocamlopt -c -for-pack Lexers_Parsers -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/DPLL -I Code/Heuristics -o Code/Lexers_Parsers/lexer_simplex.cmx Code/Lexers_Parsers/lexer_simplex.ml # cached
 # Target: Code/Theories/simplex.cmx, tags: { compile, extension:cmx, extension:ml, file:Code/Theories/simplex.cmx, file:Code/Theories/simplex.ml, for-pack(Theories), implem, native, ocaml, quiet }
-/usr/bin/ocamlopt -c -for-pack Theories -I Code/Theories -I Code/Lexers_Parsers -I Code/General -I Code/DPLL -I Code/Heuristics -o Code/Theories/simplex.cmx Code/Theories/simplex.ml
-+ /usr/bin/ocamlopt -c -for-pack Theories -I Code/Theories -I Code/Lexers_Parsers -I Code/General -I Code/DPLL -I Code/Heuristics -o Code/Theories/simplex.cmx Code/Theories/simplex.ml
-File "Code/Theories/simplex.ml", line 143, characters 2-197:
-Warning 25: bad style, all clauses in this pattern-matching are guarded.
+/usr/bin/ocamlopt -c -for-pack Theories -I Code/Theories -I Code/Lexers_Parsers -I Code/General -I Code/DPLL -I Code/Heuristics -o Code/Theories/simplex.cmx Code/Theories/simplex.ml # cached
 # Target: Code/Theories/Theories.cmx, tags: { extension:cmx, file:Code/Theories/Theories.cmx, native, ocaml, pack, quiet }
-touch Code/Theories/Theories.mli  ; if  /usr/bin/ocamlopt -pack -I Code/Theories Code/Theories/base.cmx Code/Theories/empty.cmx Code/Theories/equality.cmx Code/Theories/simplex.cmx -o Code/Theories/Theories.cmx  ; then  rm -f Code/Theories/Theories.mli  ; else  rm -f Code/Theories/Theories.mli  ; exit 1; fi
+touch Code/Theories/Theories.mli  ; if  /usr/bin/ocamlopt -pack -I Code/Theories Code/Theories/base.cmx Code/Theories/empty.cmx Code/Theories/equality.cmx Code/Theories/simplex.cmx -o Code/Theories/Theories.cmx  ; then  rm -f Code/Theories/Theories.mli  ; else  rm -f Code/Theories/Theories.mli  ; exit 1; fi # cached
 # Target: Code/DPLL/types.cmx, tags: { compile, extension:cmx, extension:ml, file:Code/DPLL/types.cmx, file:Code/DPLL/types.ml, for-pack(DPLL), implem, native, ocaml, quiet }
 /usr/bin/ocamlopt -c -for-pack DPLL -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/types.cmx Code/DPLL/types.ml # cached
 # Target: Code/DPLL/init.cmx, tags: { compile, extension:cmx, extension:ml, file:Code/DPLL/init.cmx, file:Code/DPLL/init.ml, for-pack(DPLL), implem, native, ocaml, quiet }
@@ -250,11 +244,5 @@ touch Code/DPLL/DPLL.mli  ; if  /usr/bin/ocamlopt -pack -I Code/DPLL Code/DPLL/c
 # Target: Code/main.cmx, tags: { compile, extension:cmx, extension:ml, file:Code/main.cmx, file:Code/main.ml, implem, native, ocaml, quiet }
 /usr/bin/ocamlopt -c -I Code -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/DPLL -I Code/Heuristics -o Code/main.cmx Code/main.ml # cached
 # Target: Code/main.native, tags: { dont_link_with, extension:native, file:Code/main.native, link, native, ocaml, program, quiet }
-/usr/bin/ocamlopt unix.cmxa Code/General/General.cmx Code/Heuristics/Heuristics.cmx Code/Lexers_Parsers/parser_cnf.cmx Code/Lexers_Parsers/lexer_cnf.cmx Code/Lexers_Parsers/parser_equ.cmx Code/Lexers_Parsers/lexer_equ.cmx Code/Lexers_Parsers/parser_simplex.cmx Code/Lexers_Parsers/lexer_simplex.cmx Code/Lexers_Parsers/parser_tseitin.cmx Code/Lexers_Parsers/lexer_tseitin.cmx Code/Theories/Theories.cmx Code/DPLL/DPLL.cmx Code/main.cmx -o Code/main.native
-+ /usr/bin/ocamlopt unix.cmxa Code/General/General.cmx Code/Heuristics/Heuristics.cmx Code/Lexers_Parsers/parser_cnf.cmx Code/Lexers_Parsers/lexer_cnf.cmx Code/Lexers_Parsers/parser_equ.cmx Code/Lexers_Parsers/lexer_equ.cmx Code/Lexers_Parsers/parser_simplex.cmx Code/Lexers_Parsers/lexer_simplex.cmx Code/Lexers_Parsers/parser_tseitin.cmx Code/Lexers_Parsers/lexer_tseitin.cmx Code/Theories/Theories.cmx Code/DPLL/DPLL.cmx Code/main.cmx -o Code/main.native
-File "_none_", line 1:
-Error: No implementations provided for the following modules:
-         Num referenced from Code/Lexers_Parsers/lexer_simplex.cmx,
-           Code/Theories/Theories.cmx
-Command exited with code 2.
-# Compilation unsuccessful.
+/usr/bin/ocamlopt unix.cmxa nums.cmxa Code/General/General.cmx Code/Heuristics/Heuristics.cmx Code/Lexers_Parsers/parser_cnf.cmx Code/Lexers_Parsers/lexer_cnf.cmx Code/Lexers_Parsers/parser_equ.cmx Code/Lexers_Parsers/lexer_equ.cmx Code/Lexers_Parsers/parser_simplex.cmx Code/Lexers_Parsers/lexer_simplex.cmx Code/Lexers_Parsers/parser_tseitin.cmx Code/Lexers_Parsers/lexer_tseitin.cmx Code/Theories/Theories.cmx Code/DPLL/DPLL.cmx Code/main.cmx -o Code/main.native # cached
+# Compilation successful.

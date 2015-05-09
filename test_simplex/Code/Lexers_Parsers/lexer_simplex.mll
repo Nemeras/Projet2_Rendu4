@@ -1,5 +1,6 @@
 {
 open Parser_simplex;;
+open Num;;
 }
 
 
@@ -20,6 +21,8 @@ rule token = parse
 	| "+"			{ PLUS }
 	| "<=" 			{ LEQ }
 	| ">="			{ GEQ }
+	| "<" 			{ LT }
+	| ">"			{ GT }
 	| "="			{ EQU }
 	| "!="			{ DIS }
 	| eof			{ EOF }				(* Fin de fichier *)
