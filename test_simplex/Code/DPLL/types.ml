@@ -121,6 +121,7 @@ let choose_theory theory =
 	| 0 -> (module Base : Theory)		(* Théorie de base qui ne concerne que les CNF *)
 	| 1 -> (module Empty : Theory)		(* Thérie vide implémentant Tseitin *)
 	| 2 -> (module Equality : Theory)	(* Théorie de l'égalité *)
+	| 3 -> (module Simplex : Theory)        (*Théorie de l'arithmétique linéaire*)
 	| _ -> failwith "Erreur dans le choix de la théorie"
 
 

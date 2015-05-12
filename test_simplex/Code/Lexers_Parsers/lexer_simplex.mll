@@ -16,7 +16,7 @@ rule token = parse
 	| "\\/"			{ OR }
 	| "/\\"			{ AND }
 	| "=>"			{ IMPLY }
-	| (rat as s)		{ RAT (Num.num_of_string s) }
+	| (int as s)		{ RAT (Num.num_of_string s) }
 	| "x" (int as s)	{ VAR (int_of_string s) }	(* Variable *)
 	| "+"			{ PLUS }
 	| "<=" 			{ LEQ }

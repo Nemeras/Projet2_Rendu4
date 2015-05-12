@@ -177,6 +177,6 @@ let choose_heuristic heuristic =
 	| 0 -> (module None : Heuristic)
 	| 1 -> (module Rand : Heuristic)
 	| 2 -> (module Moms : Heuristic)
-	| 3 -> (module Moms : Heuristic)
+	| 3 -> (module Dlis : Heuristic)
 	| 4 -> (module Vsids : Heuristic)
 	| _ -> failwith "Erreur dans le choix de l'heuristique"

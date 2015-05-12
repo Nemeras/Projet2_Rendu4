@@ -28,8 +28,8 @@ formula:
 
 form:
 	| atom1			{ Lit ($1, 0) }
-	| atom2			{ let (lis,rat)=$1 in Or(Lit((lis,(rat,Num.num_of_string "-1",3)),0),Lit((lis,(rat,Num.num_of_int 1,4)),0),0)}
-	| atom3	        	{ let (lis,rat)=$1 in And(Lit((lis,(rat,Num.num_of_string 0,1)),0),Lit((lis,(rat,Num.num_of_int 0,2)),0),0)}
+	| atomdis		{ $1 }
+	| atomequ        	{ $1 }
 	| LPAREN form RPAREN	{ $2 }
 	| NOT form		{ Not ($2,0) }
 	| form OR form		{ Or ($1, $3, 0) }
@@ -43,11 +43,11 @@ atom1:
 	| sum GT RAT 		{ ($1,($3,Num.num_of_int 1),4) }
 
 ;
-atom2:
-	| sum DIS RAT		{ ($1,$3) }
+atomdis:
+	| sum DIS RAT		{ Or(Lit(($1,($3,Num.num_of_string "-1"),3),0), Lit(($1,($3,Num.num_of_int 1),4),0),0) }
 ;
-atom3:
- 	| sum EQU RAT		{ ($1,$3) }
+atomequ:
+ 	| sum EQU RAT		{ And(Lit(($1,($3,Num.num_of_int 0),1),0),Lit(($1,($3,Num.num_of_int 0),2),0),0) }
 ;
 sum:
 	|RAT VAR PLUS sum	{ ($1,$2)::$4 }

@@ -202,17 +202,17 @@ let yyact = [|
 # 203 "Code/Lexers_Parsers/parser_simplex.ml"
                : 'form))
 ; (fun __caml_parser_env ->
-    let _1 = (Parsing.peek_val __caml_parser_env 0 : 'atom2) in
+    let _1 = (Parsing.peek_val __caml_parser_env 0 : 'atomdis) in
     Obj.repr(
 # 31 "Code/Lexers_Parsers/parser_simplex.mly"
-           ( _1 )
+            ( _1 )
 # 210 "Code/Lexers_Parsers/parser_simplex.ml"
                : 'form))
 ; (fun __caml_parser_env ->
-    let _1 = (Parsing.peek_val __caml_parser_env 0 : 'atom3) in
+    let _1 = (Parsing.peek_val __caml_parser_env 0 : 'atomequ) in
     Obj.repr(
 # 32 "Code/Lexers_Parsers/parser_simplex.mly"
-                  ( _1 )
+                   ( _1 )
 # 217 "Code/Lexers_Parsers/parser_simplex.ml"
                : 'form))
 ; (fun __caml_parser_env ->
@@ -274,7 +274,7 @@ let yyact = [|
     let _3 = (Parsing.peek_val __caml_parser_env 0 : Num.num) in
     Obj.repr(
 # 42 "Code/Lexers_Parsers/parser_simplex.mly"
-               ( (_1,(_3,Num.num_of_string "-1"),3) )
+               ( (_1,(_3,Num.num_of_int (-1)),3) )
 # 279 "Code/Lexers_Parsers/parser_simplex.ml"
                : 'atom1))
 ; (fun __caml_parser_env ->
@@ -290,9 +290,9 @@ let yyact = [|
     let _3 = (Parsing.peek_val __caml_parser_env 0 : Num.num) in
     Obj.repr(
 # 47 "Code/Lexers_Parsers/parser_simplex.mly"
-                ( Or(Lit((_1,(_3,Num.num_of_string "-1"),3),0), Lit((_1,(_3,Num.num_of_int 1),4),0),0) )
+                ( Or(Lit((_1,(_3,Num.num_of_int (-1)),3),0), Lit((_1,(_3,Num.num_of_int 1),4),0),0) )
 # 295 "Code/Lexers_Parsers/parser_simplex.ml"
-               : 'atom2))
+               : 'atomdis))
 ; (fun __caml_parser_env ->
     let _1 = (Parsing.peek_val __caml_parser_env 2 : 'sum) in
     let _3 = (Parsing.peek_val __caml_parser_env 0 : Num.num) in
@@ -300,7 +300,7 @@ let yyact = [|
 # 50 "Code/Lexers_Parsers/parser_simplex.mly"
                  ( And(Lit((_1,(_3,Num.num_of_int 0),1),0),Lit((_1,(_3,Num.num_of_int 0),2),0),0) )
 # 303 "Code/Lexers_Parsers/parser_simplex.ml"
-               : 'atom3))
+               : 'atomequ))
 ; (fun __caml_parser_env ->
     let _1 = (Parsing.peek_val __caml_parser_env 3 : Num.num) in
     let _2 = (Parsing.peek_val __caml_parser_env 2 : int) in

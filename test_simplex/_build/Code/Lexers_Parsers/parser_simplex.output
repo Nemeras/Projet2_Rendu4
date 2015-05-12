@@ -4,8 +4,8 @@
    2          | EOF
 
    3  form : atom1
-   4       | atom2
-   5       | atom3
+   4       | atomdis
+   5       | atomequ
    6       | LPAREN form RPAREN
    7       | NOT form
    8       | form OR form
@@ -17,9 +17,9 @@
   13        | sum LT RAT
   14        | sum GT RAT
 
-  15  atom2 : sum DIS RAT
+  15  atomdis : sum DIS RAT
 
-  16  atom3 : sum EQU RAT
+  16  atomequ : sum EQU RAT
 
   17  sum : RAT VAR PLUS sum
   18      | RAT VAR
@@ -47,8 +47,8 @@ state 1
 	formula  goto 7
 	form  goto 8
 	atom1  goto 9
-	atom2  goto 10
-	atom3  goto 11
+	atomdis  goto 10
+	atomequ  goto 11
 	sum  goto 12
 
 
@@ -76,8 +76,8 @@ state 4
 
 	form  goto 14
 	atom1  goto 9
-	atom2  goto 10
-	atom3  goto 11
+	atomdis  goto 10
+	atomequ  goto 11
 	sum  goto 12
 
 
@@ -91,8 +91,8 @@ state 5
 
 	form  goto 15
 	atom1  goto 9
-	atom2  goto 10
-	atom3  goto 11
+	atomdis  goto 10
+	atomequ  goto 11
 	sum  goto 12
 
 
@@ -126,8 +126,8 @@ state 8
 	formula  goto 19
 	form  goto 8
 	atom1  goto 9
-	atom2  goto 10
-	atom3  goto 11
+	atomdis  goto 10
+	atomequ  goto 11
 	sum  goto 12
 
 
@@ -138,13 +138,13 @@ state 9
 
 
 state 10
-	form : atom2 .  (4)
+	form : atomdis .  (4)
 
 	.  reduce 4
 
 
 state 11
-	form : atom3 .  (5)
+	form : atomequ .  (5)
 
 	.  reduce 5
 
@@ -154,8 +154,8 @@ state 12
 	atom1 : sum . GEQ RAT  (12)
 	atom1 : sum . LT RAT  (13)
 	atom1 : sum . GT RAT  (14)
-	atom2 : sum . DIS RAT  (15)
-	atom3 : sum . EQU RAT  (16)
+	atomdis : sum . DIS RAT  (15)
+	atomequ : sum . EQU RAT  (16)
 
 	EQU  shift 20
 	DIS  shift 21
@@ -211,8 +211,8 @@ state 16
 
 	form  goto 28
 	atom1  goto 9
-	atom2  goto 10
-	atom3  goto 11
+	atomdis  goto 10
+	atomequ  goto 11
 	sum  goto 12
 
 
@@ -226,8 +226,8 @@ state 17
 
 	form  goto 29
 	atom1  goto 9
-	atom2  goto 10
-	atom3  goto 11
+	atomdis  goto 10
+	atomequ  goto 11
 	sum  goto 12
 
 
@@ -241,8 +241,8 @@ state 18
 
 	form  goto 30
 	atom1  goto 9
-	atom2  goto 10
-	atom3  goto 11
+	atomdis  goto 10
+	atomequ  goto 11
 	sum  goto 12
 
 
@@ -253,14 +253,14 @@ state 19
 
 
 state 20
-	atom3 : sum EQU . RAT  (16)
+	atomequ : sum EQU . RAT  (16)
 
 	RAT  shift 31
 	.  error
 
 
 state 21
-	atom2 : sum DIS . RAT  (15)
+	atomdis : sum DIS . RAT  (15)
 
 	RAT  shift 32
 	.  error
@@ -351,13 +351,13 @@ state 30
 
 
 state 31
-	atom3 : sum EQU RAT .  (16)
+	atomequ : sum EQU RAT .  (16)
 
 	.  reduce 16
 
 
 state 32
-	atom2 : sum DIS RAT .  (15)
+	atomdis : sum DIS RAT .  (15)
 
 	.  reduce 15
 
