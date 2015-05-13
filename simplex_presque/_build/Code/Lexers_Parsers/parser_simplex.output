@@ -1,0 +1,396 @@
+   0  $accept : %entry% $end
+
+   1  formula : form formula
+   2          | EOF
+
+   3  form : atom1
+   4       | atomdis
+   5       | atomequ
+   6       | LPAREN form RPAREN
+   7       | NOT form
+   8       | form OR form
+   9       | form AND form
+  10       | form IMPLY form
+
+  11  atom1 : sum LEQ RAT
+  12        | sum GEQ RAT
+  13        | sum LT RAT
+  14        | sum GT RAT
+
+  15  atomdis : sum DIS RAT
+
+  16  atomequ : sum EQU RAT
+
+  17  sum : RAT VAR PLUS sum
+  18      | RAT VAR
+
+  19  %entry% : '\001' formula
+
+state 0
+	$accept : . %entry% $end  (0)
+
+	'\001'  shift 1
+	.  error
+
+	%entry%  goto 2
+
+
+state 1
+	%entry% : '\001' . formula  (19)
+
+	RAT  shift 3
+	LPAREN  shift 4
+	NOT  shift 5
+	EOF  shift 6
+	.  error
+
+	formula  goto 7
+	form  goto 8
+	atom1  goto 9
+	atomdis  goto 10
+	atomequ  goto 11
+	sum  goto 12
+
+
+state 2
+	$accept : %entry% . $end  (0)
+
+	$end  accept
+
+
+state 3
+	sum : RAT . VAR PLUS sum  (17)
+	sum : RAT . VAR  (18)
+
+	VAR  shift 13
+	.  error
+
+
+state 4
+	form : LPAREN . form RPAREN  (6)
+
+	RAT  shift 3
+	LPAREN  shift 4
+	NOT  shift 5
+	.  error
+
+	form  goto 14
+	atom1  goto 9
+	atomdis  goto 10
+	atomequ  goto 11
+	sum  goto 12
+
+
+state 5
+	form : NOT . form  (7)
+
+	RAT  shift 3
+	LPAREN  shift 4
+	NOT  shift 5
+	.  error
+
+	form  goto 15
+	atom1  goto 9
+	atomdis  goto 10
+	atomequ  goto 11
+	sum  goto 12
+
+
+state 6
+	formula : EOF .  (2)
+
+	.  reduce 2
+
+
+state 7
+	%entry% : '\001' formula .  (19)
+
+	.  reduce 19
+
+
+state 8
+	formula : form . formula  (1)
+	form : form . OR form  (8)
+	form : form . AND form  (9)
+	form : form . IMPLY form  (10)
+
+	RAT  shift 3
+	LPAREN  shift 4
+	IMPLY  shift 16
+	AND  shift 17
+	OR  shift 18
+	NOT  shift 5
+	EOF  shift 6
+	.  error
+
+	formula  goto 19
+	form  goto 8
+	atom1  goto 9
+	atomdis  goto 10
+	atomequ  goto 11
+	sum  goto 12
+
+
+state 9
+	form : atom1 .  (3)
+
+	.  reduce 3
+
+
+state 10
+	form : atomdis .  (4)
+
+	.  reduce 4
+
+
+state 11
+	form : atomequ .  (5)
+
+	.  reduce 5
+
+
+state 12
+	atom1 : sum . LEQ RAT  (11)
+	atom1 : sum . GEQ RAT  (12)
+	atom1 : sum . LT RAT  (13)
+	atom1 : sum . GT RAT  (14)
+	atomdis : sum . DIS RAT  (15)
+	atomequ : sum . EQU RAT  (16)
+
+	EQU  shift 20
+	DIS  shift 21
+	LEQ  shift 22
+	GEQ  shift 23
+	LT  shift 24
+	GT  shift 25
+	.  error
+
+
+state 13
+	sum : RAT VAR . PLUS sum  (17)
+	sum : RAT VAR .  (18)
+
+	PLUS  shift 26
+	EQU  reduce 18
+	DIS  reduce 18
+	LEQ  reduce 18
+	GEQ  reduce 18
+	LT  reduce 18
+	GT  reduce 18
+
+
+state 14
+	form : LPAREN form . RPAREN  (6)
+	form : form . OR form  (8)
+	form : form . AND form  (9)
+	form : form . IMPLY form  (10)
+
+	RPAREN  shift 27
+	IMPLY  shift 16
+	AND  shift 17
+	OR  shift 18
+	.  error
+
+
+state 15
+	form : NOT form .  (7)
+	form : form . OR form  (8)
+	form : form . AND form  (9)
+	form : form . IMPLY form  (10)
+
+	.  reduce 7
+
+
+state 16
+	form : form IMPLY . form  (10)
+
+	RAT  shift 3
+	LPAREN  shift 4
+	NOT  shift 5
+	.  error
+
+	form  goto 28
+	atom1  goto 9
+	atomdis  goto 10
+	atomequ  goto 11
+	sum  goto 12
+
+
+state 17
+	form : form AND . form  (9)
+
+	RAT  shift 3
+	LPAREN  shift 4
+	NOT  shift 5
+	.  error
+
+	form  goto 29
+	atom1  goto 9
+	atomdis  goto 10
+	atomequ  goto 11
+	sum  goto 12
+
+
+state 18
+	form : form OR . form  (8)
+
+	RAT  shift 3
+	LPAREN  shift 4
+	NOT  shift 5
+	.  error
+
+	form  goto 30
+	atom1  goto 9
+	atomdis  goto 10
+	atomequ  goto 11
+	sum  goto 12
+
+
+state 19
+	formula : form formula .  (1)
+
+	.  reduce 1
+
+
+state 20
+	atomequ : sum EQU . RAT  (16)
+
+	RAT  shift 31
+	.  error
+
+
+state 21
+	atomdis : sum DIS . RAT  (15)
+
+	RAT  shift 32
+	.  error
+
+
+state 22
+	atom1 : sum LEQ . RAT  (11)
+
+	RAT  shift 33
+	.  error
+
+
+state 23
+	atom1 : sum GEQ . RAT  (12)
+
+	RAT  shift 34
+	.  error
+
+
+state 24
+	atom1 : sum LT . RAT  (13)
+
+	RAT  shift 35
+	.  error
+
+
+state 25
+	atom1 : sum GT . RAT  (14)
+
+	RAT  shift 36
+	.  error
+
+
+state 26
+	sum : RAT VAR PLUS . sum  (17)
+
+	RAT  shift 3
+	.  error
+
+	sum  goto 37
+
+
+state 27
+	form : LPAREN form RPAREN .  (6)
+
+	.  reduce 6
+
+
+state 28
+	form : form . OR form  (8)
+	form : form . AND form  (9)
+	form : form . IMPLY form  (10)
+	form : form IMPLY form .  (10)
+
+	IMPLY  shift 16
+	AND  shift 17
+	OR  shift 18
+	RAT  reduce 10
+	LPAREN  reduce 10
+	RPAREN  reduce 10
+	NOT  reduce 10
+	EOF  reduce 10
+
+
+state 29
+	form : form . OR form  (8)
+	form : form . AND form  (9)
+	form : form AND form .  (9)
+	form : form . IMPLY form  (10)
+
+	.  reduce 9
+
+
+state 30
+	form : form . OR form  (8)
+	form : form OR form .  (8)
+	form : form . AND form  (9)
+	form : form . IMPLY form  (10)
+
+	AND  shift 17
+	RAT  reduce 8
+	LPAREN  reduce 8
+	RPAREN  reduce 8
+	IMPLY  reduce 8
+	OR  reduce 8
+	NOT  reduce 8
+	EOF  reduce 8
+
+
+state 31
+	atomequ : sum EQU RAT .  (16)
+
+	.  reduce 16
+
+
+state 32
+	atomdis : sum DIS RAT .  (15)
+
+	.  reduce 15
+
+
+state 33
+	atom1 : sum LEQ RAT .  (11)
+
+	.  reduce 11
+
+
+state 34
+	atom1 : sum GEQ RAT .  (12)
+
+	.  reduce 12
+
+
+state 35
+	atom1 : sum LT RAT .  (13)
+
+	.  reduce 13
+
+
+state 36
+	atom1 : sum GT RAT .  (14)
+
+	.  reduce 14
+
+
+state 37
+	sum : RAT VAR PLUS sum .  (17)
+
+	.  reduce 17
+
+
+19 terminals, 8 nonterminals
+20 grammar rules, 38 states
