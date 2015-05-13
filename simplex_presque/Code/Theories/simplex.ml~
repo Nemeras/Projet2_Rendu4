@@ -40,6 +40,7 @@ type rescheck=
 
 type stack = change list	(* Pile des modifications au fil des instanciations dans DPLL *)
 
+(*Definition d'operateurs necessaires pour la gestion des bornes strictes*)
   
 let (+@) a b =
   let (rat,k)=a in 
@@ -152,6 +153,7 @@ let rec maxv form_list nbl =
 match form_list with
 |h::t -> max (max_v h nbl) (maxv t nbl);
 |[] -> 0;;
+(*Lit recursivement l'arbre, renvoie la valeur de la plus "grande" variable et stocke toutes les variables non basiques dans la liste de variables non basiques.*)
 
 let rec analyze_aux ato bl numerotage con_add=
 let (lis,rat,k) =ato in
@@ -173,6 +175,7 @@ match forml with
 |[h] -> [analyze_rec2 h bl nbl numerotage con_add]
 |h::t -> (analyze_rec2 h bl nbl numerotage con_add )::(analyze_rec t bl nbl numerotage con_add);;
 
+(*Pretraite l'arbre : voir Readme*)
 let analyze_beginning form_list =
 let bas_list = ref [] in
 let nbas_list = ref [] in
@@ -235,6 +238,7 @@ let parse file =
 let parse_cnf s =
 	Parser_cnf.cnf Lexer_cnf.token (lexstr s)
 
+(*Donne le maximum d'une liste d'int*)
 let rec maxlist liste =
 match liste with
 |[]->0;
@@ -250,10 +254,12 @@ match con_add with
 |h::t -> let (lis,num)=h in con_m_aux_aux lis num cm;con_m_aux t cm;
 |[]-> flush stdout;cm;;
 
+(*Cree la matrice de contraintes a partir d'une liste de contraintes*)
 let create_con_m con_add taille=
 let cm = Array.make_matrix taille taille (num_of_int 0) in
 con_m_aux con_add cm;;
 
+(*Initialise le solveur*)
 let create file aff_cnf =
 	try
 		let f = parse file in
@@ -294,23 +300,25 @@ with _ -> (failwith "Erreur de saisie");;
 		(** UPDATE / BACKTRACK **)
 
 
-(* Choisit la modification à apporter à la structure selon la nature de l'instanciation *)
-
+(*parcours une liste en supprimant toute apparence de la variable x dans cette liste*)
 let rec parcours liste x =
 match liste with
 |h::t when h=x -> parcours t x
 |h::t -> h::(parcours t x)
 |[] -> [];;
- 
+
+(*sauvegarde l'etat du solveur*) 
 let save_state struc =
 Array.copy struc.inst,Array.copy struc.ba
 
+(*Echange deux variable dont l'une est basique et l'autre non basique : la basique devient non basique et vice-versa.*)
 let remove_l r s struc =
 struc.bl <- parcours struc.bl r;
 struc.nbl <- parcours struc.nbl s;
 struc.bl <- Sort.sort_uniq fun_sort2 (s::struc.bl);
 struc.nbl <- Sort.sort_uniq fun_sort2 (r::struc.nbl);;
 
+(*Implementation de pivot *)
 let pivot r s struc= 
 remove_l r s struc;
 let i = ref 0 in
@@ -346,11 +354,13 @@ if !i <> s then
   end
 done;;
 
+
 let rec update_alg_aux i v struc=
 match struc.bl with
 |h::t -> struc.inst.(h) <- struc.inst.(h) +@ (v -@ (struc.cm.(h).(i) *@ struc.inst.(i)));
 |[] -> ();;
 
+(*Implementation de update*)
 let update_alg i v struc=
 update_alg_aux i v struc;
 struc.inst.(i)<-v;;
@@ -362,6 +372,7 @@ match liste with
 |h::t when h = i-> pivot_update_aux t i j struc theta;
 |h::t -> struc.inst.(h) <- struc.inst.(h) +@ (struc.cm.(h).(j) *@ theta); pivot_update_aux t i j struc theta;; 
 
+(*Implementation de pivotandupdate*)
 let pivotandupdate i j v struc=
   let theta =((v -@ struc.inst.(i)) /@ (struc.cm.(i).(j))) in
   struc.inst.(i) <- v;
@@ -369,6 +380,7 @@ let pivotandupdate i j v struc=
   pivot_update_aux (struc.bl) i j struc theta;
   pivot i j struc;;
 
+(*Change la borne sup d'une variable*)
 let assertupper i c struc lit=
 if c <@ (snd struc.ba.(i)) then
   begin
@@ -387,6 +399,7 @@ if c <@ (snd struc.ba.(i)) then
   end
 else struc.st <-Nothing(Upp(i,c))::struc.st;;
 
+(*Change la borne inf d'une variable*)
 let assertlower i c struc lit=
 if c >@ (fst struc.ba.(i)) then
   begin
@@ -420,11 +433,11 @@ let modif_neg struc lit =
   |Geq(var,(rat,k)) -> assertupper var (rat,num_of_int 0) struc (-lit);
   |_-> failwith "probleme dans modif : lt ou gt encore present.";;
 
-
+(*Suivant la valeur du litteral, applique la bonne modification a la structure.*)
 let modif struc lit = 
 if abs lit = lit then modif_pos struc lit else modif_neg struc (abs lit);;
 
-
+(*
 let rec search_stack1 x k struc stack refl=
 match stack with
 |Nothing(_)::t->search_stack1 x k struc t refl;
@@ -437,11 +450,11 @@ match stack with
 |Nothing(_)::t->search_stack1 x k struc t refl;
 |Something(_,Low(i,c),lit)::t when (i=x)&&(c=k)-> refl:=(-lit)::!refl;search_stack2 x k struc t refl;
 |Something(_,_,_)::t -> search_stack1 x k struc t refl;
-|[] -> ();;
+|[] -> ();;*)
 
 
-
-let rec search_np1 struc lis i refl=
+(*Permet de construire l'explication de l'insatisfiabilité*)
+(*let rec search_np1 struc lis i refl=
 match lis with
 |h::t when (struc.cm.(i).(h) >/ num_of_int 0) -> search_stack1 h (snd struc.ba.(h)) struc struc.st refl; search_np1 struc t i refl
 |h::t -> search_np1 struc t i refl
@@ -451,25 +464,26 @@ let rec search_nm1 struc lis i refl=
 match lis with
 |h::t when (struc.cm.(i).(h) </ num_of_int 0) -> search_stack1 h (fst struc.ba.(h)) struc struc.st refl; search_nm1 struc t i refl
 |h::t -> search_np1 struc t i refl
-|[] -> ();;
+|[] -> ();;*)
 
 
-let rec check_aux_aux1 loop sat liste struc i =
+let rec check_aux_aux1 loop sat liste struc i=
 match liste with
-|[]-> sat:=false;loop:=false;let refl = ref [0] in search_np1 struc struc.nbl i refl; search_nm1 struc struc.nbl i refl;struc.unsat<- !refl;
+|[]-> sat:=false;loop:=false;(*let refl = ref ((-lit)::[0]) in search_np1 struc struc.nbl i refl; search_nm1 struc struc.nbl i refl;struc.unsat<- !refl;*)
 |x::t when List.exists (fun k -> k=x) struc.bl -> check_aux_aux1 loop sat t struc i;
 |x::t when ((struc.cm.(i).(x) >/ (num_of_int 0)) && (struc.inst.(x) <@ (snd (struc.ba.(x)))))|| ((struc.cm.(i).(x) </ (num_of_int 0))  && (struc.inst.(x) >@ (fst  (struc.ba.(x))))) -> 
   pivotandupdate i x ( fst (struc.ba.(i))) struc;
 |x::t ->check_aux_aux1 loop sat t struc i;;
 
 
-let rec check_aux_aux2 loop sat liste struc i =
+let rec check_aux_aux2 loop sat liste struc i=
 match liste with
-|[]-> sat:=false;loop:=false;let refl = ref [0] in search_np1 struc struc.nbl i refl; search_nm1 struc struc.nbl i refl; struc.unsat <- !refl;
+|[]-> sat:=false;loop:=false;(*let refl = ref ((-lit)::[0]) in search_np1 struc struc.nbl i refl; search_nm1 struc struc.nbl i refl; struc.unsat <- !refl;*)
 |x::t when List.exists (fun k -> k=x) struc.bl -> check_aux_aux2 loop sat t struc i;
 |x::t when ((struc.cm.(i).(x) </ (num_of_int 0)) && (struc.inst.(x) <@ snd (struc.ba.(x)))) || ((struc.cm.(i).(x) >/ (num_of_int 0)) && (struc.inst.(x) >@ fst (struc.ba.(x)))) ->
   pivotandupdate i x (fst (struc.ba.(i))) struc;
 |x::t -> check_aux_aux2 loop sat t struc i;;
+
 
 let rec check_aux loop sat liste struc= 
 match liste with
@@ -479,12 +493,14 @@ match liste with
 |x::t when struc.inst.(x) >@ (snd struc.ba.(x)) -> check_aux_aux2 loop sat struc.nbl struc x; 
 |x::t -> check_aux loop sat t struc;;
 
-
+(*charge un etat memoire*)
 let restore_state bounds instanc struc =
 struc.inst <- instanc;
 struc.ba <- bounds;;
 
-let check_unsat struc =
+
+(* Permet de verifier si une instance du solveur est satisfiable*)
+let check_unsat struc=
 let loop = ref true in
 let sat = ref false in
 while !loop do
@@ -494,7 +510,7 @@ done;
 !sat;;
 	
        
-
+(*met a jour la structure*)
 let update struc lit =
   (* On n'agit que si lit correspond à un atome *)
   if (abs lit) < (Array.length struc.aa) then
@@ -523,21 +539,22 @@ begin
     |Something((i,b),_,_) -> restore_state b i struc;
 end;;
 
+(*trouve une valeur acceptable pour le delta*)
 let compute_delta struc =
-  let delta = ref (num_of_string "1/10") in
+  let delta = ref (num_of_string "2/10") in
+  let kmax = ref (num_of_int 0) in
     let temp = ref (num_of_int 0) in
 for i=1 to (-1+Array.length struc.ba) do
   temp:= ((abs_num (fst (fst struc.ba.(i)))) +/ (abs_num (fst (snd struc.ba.(i))))) // (num_of_int 2);
   if !temp <>/ (num_of_int 0) then
     delta := min_num (!delta) (!temp);
+      kmax := max_num (!kmax) (max_num (snd (fst struc.ba.(i))) (snd (snd struc.ba.(i))));
 done;
-!delta;;
-
-
+(!delta */ !kmax)//(num_of_int 2);;
 
 		(** INSATISFIABILITE **)
 
-
+(*Donne une explication de l'insatisfiabilite*)
 let unsat struc =
 	struc.unsat
 
@@ -551,6 +568,7 @@ match lis with
 |[] -> flush stdout;
 |h::t -> Printf.printf "x%d = %s\n" h (string_of_num ((fst struc.inst.(h)) +/ ((snd struc.inst.(h)) */ delta)));flush stdout;print_l_inst t struc delta;;
 
+(*Affiche une instanciation*)
 let print_solution res solver =
 	match res with
 	| Cnf.False ->

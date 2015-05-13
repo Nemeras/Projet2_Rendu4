@@ -437,24 +437,24 @@ let modif_neg struc lit =
 let modif struc lit = 
 if abs lit = lit then modif_pos struc lit else modif_neg struc (abs lit);;
 
-(*
+
 let rec search_stack1 x k struc stack refl=
 match stack with
 |Nothing(_)::t->search_stack1 x k struc t refl;
-|Something(_,Upp(i,c),lit)::t when (i=x)&&(c=k)-> refl:=(-lit)::!refl;search_stack1 x k struc t refl;
+|Something(_,Upp(i,c),lit)::t when (i=x)&&(c =@ k)-> refl:=(-lit)::!refl;search_stack1 x k struc t refl;
 |Something(_,_,_)::t -> search_stack1 x k struc t refl;
 |[] -> ();;
 
 let rec search_stack2 x k struc stack refl=
 match stack with
 |Nothing(_)::t->search_stack1 x k struc t refl;
-|Something(_,Low(i,c),lit)::t when (i=x)&&(c=k)-> refl:=(-lit)::!refl;search_stack2 x k struc t refl;
+|Something(_,Low(i,c),lit)::t when (i=x)&&(c =@ k)-> refl:=(-lit)::!refl;search_stack2 x k struc t refl;
 |Something(_,_,_)::t -> search_stack1 x k struc t refl;
-|[] -> ();;*)
+|[] -> ();;
 
 
 (*Permet de construire l'explication de l'insatisfiabilité*)
-(*let rec search_np1 struc lis i refl=
+let rec search_np1 struc lis i refl=
 match lis with
 |h::t when (struc.cm.(i).(h) >/ num_of_int 0) -> search_stack1 h (snd struc.ba.(h)) struc struc.st refl; search_np1 struc t i refl
 |h::t -> search_np1 struc t i refl
@@ -464,34 +464,34 @@ let rec search_nm1 struc lis i refl=
 match lis with
 |h::t when (struc.cm.(i).(h) </ num_of_int 0) -> search_stack1 h (fst struc.ba.(h)) struc struc.st refl; search_nm1 struc t i refl
 |h::t -> search_np1 struc t i refl
-|[] -> ();;*)
+|[] -> ();;
 
 
-let rec check_aux_aux1 loop sat liste struc i=
+let rec check_aux_aux1 loop sat liste struc i lit=
 match liste with
-|[]-> sat:=false;loop:=false;(*let refl = ref ((-lit)::[0]) in search_np1 struc struc.nbl i refl; search_nm1 struc struc.nbl i refl;struc.unsat<- !refl;*)
-|x::t when List.exists (fun k -> k=x) struc.bl -> check_aux_aux1 loop sat t struc i;
+|[]-> sat:=false;loop:=false;let refl = ref [-lit] in search_np1 struc struc.nbl i refl; search_nm1 struc struc.nbl i refl;struc.unsat<- !refl;
+|x::t when List.exists (fun k -> k=x) struc.bl -> check_aux_aux1 loop sat t struc i lit;
 |x::t when ((struc.cm.(i).(x) >/ (num_of_int 0)) && (struc.inst.(x) <@ (snd (struc.ba.(x)))))|| ((struc.cm.(i).(x) </ (num_of_int 0))  && (struc.inst.(x) >@ (fst  (struc.ba.(x))))) -> 
   pivotandupdate i x ( fst (struc.ba.(i))) struc;
-|x::t ->check_aux_aux1 loop sat t struc i;;
+|x::t ->check_aux_aux1 loop sat t struc i lit;;
 
 
-let rec check_aux_aux2 loop sat liste struc i=
+let rec check_aux_aux2 loop sat liste struc i lit=
 match liste with
-|[]-> sat:=false;loop:=false;(*let refl = ref ((-lit)::[0]) in search_np1 struc struc.nbl i refl; search_nm1 struc struc.nbl i refl; struc.unsat <- !refl;*)
-|x::t when List.exists (fun k -> k=x) struc.bl -> check_aux_aux2 loop sat t struc i;
+|[]-> sat:=false;loop:=false;let refl = ref [-lit] in search_np1 struc struc.nbl i refl; search_nm1 struc struc.nbl i refl; struc.unsat <- !refl;
+|x::t when List.exists (fun k -> k=x) struc.bl -> check_aux_aux2 loop sat t struc i lit;
 |x::t when ((struc.cm.(i).(x) </ (num_of_int 0)) && (struc.inst.(x) <@ snd (struc.ba.(x)))) || ((struc.cm.(i).(x) >/ (num_of_int 0)) && (struc.inst.(x) >@ fst (struc.ba.(x)))) ->
   pivotandupdate i x (fst (struc.ba.(i))) struc;
-|x::t -> check_aux_aux2 loop sat t struc i;;
+|x::t -> check_aux_aux2 loop sat t struc i lit;;
 
 
-let rec check_aux loop sat liste struc= 
+let rec check_aux loop sat liste struc lit= 
 match liste with
 |[] -> sat:=true;loop:=false;
-|x::t when (List.exists (fun k -> k=x) struc.nbl) -> check_aux loop sat t struc;
-|x::t when struc.inst.(x) <@ (fst struc.ba.(x)) -> check_aux_aux1 loop sat struc.nbl struc x;
-|x::t when struc.inst.(x) >@ (snd struc.ba.(x)) -> check_aux_aux2 loop sat struc.nbl struc x; 
-|x::t -> check_aux loop sat t struc;;
+|x::t when (List.exists (fun k -> k=x) struc.nbl) -> check_aux loop sat t struc lit;
+|x::t when struc.inst.(x) <@ (fst struc.ba.(x)) -> check_aux_aux1 loop sat struc.nbl struc x lit;
+|x::t when struc.inst.(x) >@ (snd struc.ba.(x)) -> check_aux_aux2 loop sat struc.nbl struc x lit; 
+|x::t -> check_aux loop sat t struc lit;;
 
 (*charge un etat memoire*)
 let restore_state bounds instanc struc =
@@ -500,11 +500,11 @@ struc.ba <- bounds;;
 
 
 (* Permet de verifier si une instance du solveur est satisfiable*)
-let check_unsat struc=
+let check_unsat struc lit=
 let loop = ref true in
 let sat = ref false in
 while !loop do
-	check_aux loop sat struc.bl struc;
+	check_aux loop sat struc.bl struc lit;
 done;
 
 !sat;;
@@ -516,7 +516,7 @@ let update struc lit =
   if (abs lit) < (Array.length struc.aa) then
     begin
       modif struc lit;
-      if check_unsat struc then 0
+      if check_unsat struc lit then 0
       else
 	-max_int;
     end
