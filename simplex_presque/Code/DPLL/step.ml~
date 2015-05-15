@@ -107,7 +107,7 @@ let continue stack solver clauses current pos heuristic origins solution levels 
 	(* S'il n'y a pas de contradiction : on suppose par défaut la première variable libre comme vraie *)
 	else
 		begin
-		k := H.next heuristic pos (C.current_clauses current H.heuristic) C.wl ;
+		k := H.next heuristic pos (C.current_clauses current solution H.heuristic) C.wl ;
 		if !k <> 0 && solution.(abs !k) = 0 then
 			begin
 			para.level <- para.level + 1 ;

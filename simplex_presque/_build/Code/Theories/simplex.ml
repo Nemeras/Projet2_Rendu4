@@ -319,6 +319,45 @@ struc.bl <- Sort.sort_uniq fun_sort2 (s::struc.bl);
 struc.nbl <- Sort.sort_uniq fun_sort2 (r::struc.nbl);;
 
 (*Implementation de pivot *)
+(*let pivot r s struc= 
+
+let i = ref 0 in
+let j = ref 0 in
+let tab = Array.make struc.taille (num_of_int 0) in
+for i= 1 to (-1+struc.taille) do
+  if (i<>r) then
+    tab.(i) <- ((num_of_int (-1)) */ struc.cm.(r).(i)) // struc.cm.(r).(s)
+  else
+    tab.(i) <- (num_of_int 1)//(struc.cm.(r).(s));
+done;
+
+while !i < (struc.taille-1) do
+i:=!i+1;
+if (!i <> r)&&(List.exists (fun k -> !i = k) struc.bl) then
+  begin
+    j:=0;
+    while !j < (struc.taille-1) do
+      j:=!j+1;
+      struc.cm.(!i).(!j) <- struc.cm.(!i).(!j) +/ ((struc.cm.(!i).(s))*/tab.(!j));
+    done;
+    struc.cm.(!i).(s) <- num_of_int 0;
+  end
+done;
+
+i:=0;
+while !i < (struc.taille-1) do
+i:=!i+1;
+struc.cm.(s).(!i)<-tab.(!i);
+done;
+
+i:=0;
+while !i <(struc.taille-1) do
+i:=!i+1;
+struc.cm.(r).(!i) <-(num_of_int 0);
+done;
+remove_l r s struc;
+print_string "pivotandupdate done \n";;*)
+
 let pivot r s struc= 
 remove_l r s struc;
 let i = ref 0 in
@@ -332,7 +371,7 @@ if (!i <> s)&&(List.exists (fun k -> !i = k) struc.bl) then
       j:=!j+1;
       
       if !j=r then
-	struc.cm.(!i).(r)<- struc.cm.(!i).(r) +/ ((struc.cm.(!i).(s))//(struc.cm.(r).(s)))
+	struc.cm.(!i).(r)<- ((struc.cm.(!i).(s))//(struc.cm.(r).(s)))
       else
 	begin
 	  if !j <> s then
@@ -352,7 +391,15 @@ if !i <> s then
     else
     struc.cm.(s).(!i) <- (struc.cm.(r).(!i))//(struc.cm.(r).(s));
   end
+done;
+i:=0;
+while !i < (-1+struc.taille) do
+  i:=!i+1;
+  begin
+    struc.cm.(r).(!i)<-num_of_int 0;
+  end
 done;;
+
 
 
 let rec update_alg_aux i v struc=
@@ -374,8 +421,10 @@ match liste with
 
 (*Implementation de pivotandupdate*)
 let pivotandupdate i j v struc=
+  print_string "pivot and update incoming \n";
   let theta =((v -@ struc.inst.(i)) /@ (struc.cm.(i).(j))) in
   struc.inst.(i) <- v;
+  print_string "\n";
   struc.inst.(j) <- struc.inst.(j) +@ theta;
   pivot_update_aux (struc.bl) i j struc theta;
   pivot i j struc;;
@@ -405,14 +454,22 @@ if c >@ (fst struc.ba.(i)) then
   begin
     if (c >@ (snd struc.ba.(i))) then
       begin
+	Printf.printf "pas de modification a faire";
         struc.st <-Nothing(Low(i,c))::struc.st;
       end
     else
       begin
         let save = save_state struc in
 	let (_,u)=struc.ba.(i) in
+	Printf.printf "nouvelle borne %s %s pour %d\n" (string_of_num (fst c)) (string_of_num (snd c)) i;
 	struc.ba.(i) <-(c,u);
-	if List.exists (fun k-> k=i) struc.nbl && struc.inst.(i) <@ c then update_alg i c struc;
+	Printf.printf "instanciation actuelle de %d : %s %s \n" i (string_of_num (fst struc.inst.(i))) (string_of_num (snd struc.inst.(i)));
+	if (List.exists (fun k -> k=i) struc.nbl) then print_string "truc \n";
+	if ((List.exists (fun k-> k=i) struc.nbl)&&(struc.inst.(i) <@ c)) then
+	  begin
+	    print_string "je dois modifier l'instanciation de i\n";
+	    update_alg i c struc;
+	  end;
 	struc.st <- Something(save,Low(i,c),lit)::struc.st
       end
   end
@@ -421,8 +478,8 @@ else struc.st <-Nothing(Low(i,c))::struc.st;;
 
 let modif_pos struc lit =	
   match struc.aa.(lit) with	
-  |Leq(var,rat) -> assertupper var rat struc lit;
-  |Geq(var,rat) -> assertlower var rat struc lit;
+  |Leq(var,rat) -> Printf.printf "upper %s / %s\n" (string_of_num (fst rat)) (string_of_num (snd rat)); assertupper var rat struc lit;
+  |Geq(var,rat) ->  Printf.printf "lower %s / %s\n" (string_of_num (fst rat)) (string_of_num (snd rat)); assertlower var rat struc lit;
   |_-> failwith "probleme dans modif : lt ou gt encore present.";;
   
 let modif_neg struc lit =
@@ -472,6 +529,7 @@ match liste with
 |[]-> sat:=false;loop:=false;let refl = ref [-lit] in search_np1 struc struc.nbl i refl; search_nm1 struc struc.nbl i refl;struc.unsat<- !refl;
 |x::t when List.exists (fun k -> k=x) struc.bl -> check_aux_aux1 loop sat t struc i lit;
 |x::t when ((struc.cm.(i).(x) >/ (num_of_int 0)) && (struc.inst.(x) <@ (snd (struc.ba.(x)))))|| ((struc.cm.(i).(x) </ (num_of_int 0))  && (struc.inst.(x) >@ (fst  (struc.ba.(x))))) -> 
+  Printf.printf "j'ai trouve une variable a modifier %s %s\n" (string_of_num (fst (fst struc.ba.(i)))) (string_of_num (snd (fst struc.ba.(i))));
   pivotandupdate i x ( fst (struc.ba.(i))) struc;
 |x::t ->check_aux_aux1 loop sat t struc i lit;;
 
@@ -481,16 +539,16 @@ match liste with
 |[]-> sat:=false;loop:=false;let refl = ref [-lit] in search_np1 struc struc.nbl i refl; search_nm1 struc struc.nbl i refl; struc.unsat <- !refl;
 |x::t when List.exists (fun k -> k=x) struc.bl -> check_aux_aux2 loop sat t struc i lit;
 |x::t when ((struc.cm.(i).(x) </ (num_of_int 0)) && (struc.inst.(x) <@ snd (struc.ba.(x)))) || ((struc.cm.(i).(x) >/ (num_of_int 0)) && (struc.inst.(x) >@ fst (struc.ba.(x)))) ->
-  pivotandupdate i x (fst (struc.ba.(i))) struc;
+  pivotandupdate i x (snd (struc.ba.(i))) struc;
 |x::t -> check_aux_aux2 loop sat t struc i lit;;
 
 
 let rec check_aux loop sat liste struc lit= 
 match liste with
-|[] -> sat:=true;loop:=false;
+|[] -> print_string "rien de mauvaise taille\n";sat:=true;loop:=false;
 |x::t when (List.exists (fun k -> k=x) struc.nbl) -> check_aux loop sat t struc lit;
-|x::t when struc.inst.(x) <@ (fst struc.ba.(x)) -> check_aux_aux1 loop sat struc.nbl struc x lit;
-|x::t when struc.inst.(x) >@ (snd struc.ba.(x)) -> check_aux_aux2 loop sat struc.nbl struc x lit; 
+|x::t when struc.inst.(x) <@ (fst struc.ba.(x)) -> print_string "variable trop petite \n"; check_aux_aux1 loop sat struc.nbl struc x lit;
+|x::t when struc.inst.(x) >@ (snd struc.ba.(x)) -> print_string "variable trop grande \n"; check_aux_aux2 loop sat struc.nbl struc x lit; 
 |x::t -> check_aux loop sat t struc lit;;
 
 (*charge un etat memoire*)

@@ -70,7 +70,7 @@ let backtrack_step stack solver current pos heuristic solution levels orders k p
 
 
 (* Implémente une itération de la boucle *)
-let continue stack solver clauses current pos heuristic origins solution levels orders k para =
+let continue stack solver clauses current pos heuristic origins solution levels orders k para unsatdpllt=
 	
 	(* On vient de découvrir la clause vide : on commence le backtrack *)
 	if solution.(0) < 0 && not para.back then
@@ -81,7 +81,7 @@ let continue stack solver clauses current pos heuristic origins solution levels 
 		P.print_new_backtrack para.print ;
 		para.back <- true ;
 		
-		if solution.(0) = -max_int then
+		if (solution.(0) = -max_int)&&(unsatdpllt) then
 			begin
 			let new_clause = T.unsat solver in
 			let clause_mod = C.maj_cl stack new_clause pos levels current.length in

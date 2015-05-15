@@ -5,8 +5,8 @@ open Num;;
 
 
 let int = ['0'-'9']+	(* Un entier positif (variable) *)
-let abs = int '/' int
-let rat = ([ '-' ]? int) | ([ '-' ]? abs)
+
+let rat = int | "-" int
 
 rule token = parse
 	| [' ' '\t' '\n']	{ token lexbuf }		(* Saut des blancs *)
@@ -16,7 +16,7 @@ rule token = parse
 	| "\\/"			{ OR }
 	| "/\\"			{ AND }
 	| "=>"			{ IMPLY }
-	| (int as s)		{ RAT (Num.num_of_string s) }
+	| (rat as s)		{ RAT (Num.num_of_string s) }
 	| "x" (int as s)	{ VAR (int_of_string s) }	(* Variable *)
 	| "+"			{ PLUS }
 	| "<=" 			{ LEQ }

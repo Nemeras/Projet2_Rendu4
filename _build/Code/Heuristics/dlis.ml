@@ -1,0 +1,106 @@
+open General
+open Cnf
+
+open DynArray
+
+type struc = {
+	taken : bool array ;
+	mutable nbr : int
+}
+
+let heuristic = 3
+
+let init cnf pos =
+	{
+		taken = Array.make (cnf.v_real+1) false ;
+		nbr = cnf.v_real
+	}
+
+let update h x =
+	h.taken.(abs x) <- true ;
+	h.nbr <- h.nbr - 1
+
+let backtrack h x =
+	h.taken.(abs x) <- false ;
+	h.nbr <- h.nbr + 1
+
+
+let learning h c =
+	()
+
+
+let next_free h =
+	let i = ref 1 in
+	while h.taken.(!i) do
+		incr i
+	done ;
+	!i
+
+
+let next_wl pos current h =
+	let n = Array.length pos - 1 in
+	let pos_real = Array.make (n+1) (0,0) in
+	let rec aux c =
+		match c with
+		| [] -> ()
+		| x::c2 when x > 0 ->
+			pos_real.(x) <- 1 + fst pos_real.(x), snd pos_real.(x) ;
+			aux c2
+		| x::c2 ->
+			pos_real.(-x) <- fst pos_real.(-x), 1 + snd pos_real.(-x) ;
+			aux c2
+	in
+	for i = 0 to current.length - 1 do
+		aux current.a.(i)
+	done ;
+	let lit_max = ref 0 in
+	let maxi = ref 0 in
+	for i = 1 to n do
+		if not h.taken.(i) && fst pos_real.(i) > !maxi then
+			begin
+			maxi := fst pos_real.(i) ;
+			lit_max := i
+			end ;
+		if not h.taken.(i) && snd pos_real.(i) > !maxi then
+			begin
+			maxi := snd pos_real.(i) ;
+			lit_max := -i
+			end
+	done ;
+	!lit_max
+
+let next_basic pos h =
+	let n = Array.length pos - 1 in
+	let new_pos = Array.map (fun (l1,l2) -> (List.length l1, List.length l2)) pos in
+	let lit_max = ref 0 in
+	let maxi = ref 0 in
+	for i = 1 to n do
+		if not h.taken.(i) && fst new_pos.(i) > !maxi then
+			begin
+			maxi := fst new_pos.(i) ;
+			lit_max := i
+			end ;
+		if not h.taken.(i) && snd new_pos.(i) > !maxi then
+			begin
+			maxi := snd new_pos.(i) ;
+			lit_max := -i
+			end
+	done ;
+	!lit_max
+
+
+let next h pos current wl =
+	let lit_max =
+		if wl then
+			next_wl pos current h
+		else
+			next_basic pos h
+	in
+	if lit_max = 0 then
+		next_free h
+	else
+		lit_max
+	
+
+let is_instanciation_full h =
+	h.nbr = 0

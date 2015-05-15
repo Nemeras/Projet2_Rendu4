@@ -9,7 +9,7 @@ module Propa (C : Clauses) (H : Heuristic) (T : Theory) =
 struct
 
 	(* Trouve toutes les conséquences des clauses unitaires (units) apparues à cette étape *)
-	let rec propa stack solver current pos heuristic solution levels orders para =
+	let rec propa stack solver current pos heuristic solution levels orders para unsatdpllt=
 		
 		let rec aux units num =
 			match units with

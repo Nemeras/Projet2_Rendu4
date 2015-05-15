@@ -11,7 +11,7 @@ open Types
 module Init_theory (T : Theory) =
 struct
 	
-	let init file wl learning heuristic draw unsat print aff_cnf =
+	let init file wl learning heuristic draw unsat print aff_cnf unsatdpllt=
 		
 		let cnf, solver = T.create file aff_cnf in
 		
@@ -19,7 +19,7 @@ struct
 		let module H = (val (choose_heuristic heuristic) : Heuristic) in
 		let module S = Dpll.DPLL (C) (H) (T) in
 		
-		let res = S.solve cnf solver learning draw unsat print in
+		let res = S.solve cnf solver learning draw unsat print unsatdpllt in
 		T.print_solution res solver
 	
 end
@@ -35,7 +35,8 @@ let _ =
 	let unsat = ref false in	(* True ssi on veut prouver l'insatisfiabilité de la CNF *)
 	let print = ref false in	(* True ssi on active l'affichage *)
 	let cnf = ref false in 		(* True ssi on active l'affichage de la cnf étudiée *)
-	
+	let unsatdpllt = ref true in
+
 	let theory = ref 0 in		(* Numéro de la théorie utilisée *)
 	let heuristic = ref 0 in
 	
@@ -57,12 +58,14 @@ let _ =
 	
 	Arg.parse options (fun s -> file := s)	"Ce programme résout l'instance de SAT / Tseitin / la théorie de l'égalité donnée dans le fichier en entrée." ;
 	
-	if !theory = 2 && !unsat then
-		failwith "L'égalité et l'explication de l'insatisfiabilité sont incompatibles dans DPLL(T)" ;
+	if ((!theory = 2)||(!theory =4)) && !unsat then
+		failwith "L'égalité/les simplex et l'explication de l'insatisfiabilité sont incompatibles dans DPLL(T)" ;
 	
 	if !heuristic = 1 then
 		Random.self_init () ;
-	
+	if !theory = 4 then
+	  unsatdpllt:= false;
+
 	let module T = (val (choose_theory !theory) : Theory) in	(* Théorie utilisée *)
 	let module Launch = Init_theory (T) in
-	Launch.init !file !wl !learning !heuristic !draw !unsat !print !cnf	(* Lancement de l'algorithme *)
+	Launch.init !file !wl !learning !heuristic !draw !unsat !print !cnf !unsatdpllt	(* Lancement de l'algorithme *)

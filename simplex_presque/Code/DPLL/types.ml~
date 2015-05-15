@@ -121,6 +121,7 @@ let choose_theory theory =
 	| 0 -> (module Base : Theory)		(* Théorie de base qui ne concerne que les CNF *)
 	| 1 -> (module Empty : Theory)		(* Thérie vide implémentant Tseitin *)
 	| 2 -> (module Equality : Theory)	(* Théorie de l'égalité *)
+	| 3 -> (module Simplex : Theory)        (*Théorie de l'arithmétique linéaire*)
 	| _ -> failwith "Erreur dans le choix de la théorie"
 
 
@@ -140,6 +141,7 @@ type parameters = {
 	mutable draw : bool ;		(* Indique si le mode iteractif du clause learning est activé *)
 	unsat : bool ;			(* Indique si l'explication de l'insatisfiabilité est désactivée *)
 	print : bool ;			(* Indique si on doit afficher les étapes intermédiaires de DPLL *)
+	unsattheory : bool              (* Indique si l'ont doit ajouter les clauses envoyees par le solveur de la theorie *)
 }
 
 

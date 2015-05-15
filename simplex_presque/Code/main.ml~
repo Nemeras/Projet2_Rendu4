@@ -66,4 +66,3 @@ let _ =
 	let module T = (val (choose_theory !theory) : Theory) in	(* Théorie utilisée *)
 	let module Launch = Init_theory (T) in
 	Launch.init !file !wl !learning !heuristic !draw !unsat !print !cnf	(* Lancement de l'algorithme *)
-	

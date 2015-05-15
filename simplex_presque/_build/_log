@@ -133,35 +133,35 @@ Warning 25: bad style, all clauses in this pattern-matching are guarded.
 # Target: Code/Theories/Theories.cmo, tags: { byte, extension:cmo, file:Code/Theories/Theories.cmo, ocaml, pack, quiet }
 /usr/bin/ocamlc -pack Code/Theories/base.cmo Code/Theories/empty.cmo Code/Theories/equality.cmo Code/Theories/simplex.cmo -o Code/Theories/Theories.cmo
 # Target: Code/DPLL/types.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Code/DPLL/types.cmo, file:Code/DPLL/types.ml, implem, ocaml, quiet }
-/usr/bin/ocamlc -c -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/types.cmo Code/DPLL/types.ml
+/usr/bin/ocamlc -c -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/types.cmo Code/DPLL/types.ml # cached
+# Target: Code/DPLL/init.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Code/DPLL/init.cmo, file:Code/DPLL/init.ml, implem, ocaml, quiet }
+/usr/bin/ocamlc -c -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/init.cmo Code/DPLL/init.ml # cached
 # Target: Code/DPLL/print_step.ml.depends, tags: { extension:ml, file:Code/DPLL/print_step.ml, ocaml, ocamldep, quiet }
 /usr/bin/ocamldep -modules Code/DPLL/print_step.ml > Code/DPLL/print_step.ml.depends # cached
+# Target: Code/DPLL/print_step.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Code/DPLL/print_step.cmo, file:Code/DPLL/print_step.ml, implem, ocaml, quiet }
+/usr/bin/ocamlc -c -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/print_step.cmo Code/DPLL/print_step.ml # cached
 # Target: Code/DPLL/propa.ml.depends, tags: { extension:ml, file:Code/DPLL/propa.ml, ocaml, ocamldep, quiet }
 /usr/bin/ocamldep -modules Code/DPLL/propa.ml > Code/DPLL/propa.ml.depends # cached
-# Target: Code/DPLL/print_step.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Code/DPLL/print_step.cmo, file:Code/DPLL/print_step.ml, implem, ocaml, quiet }
-/usr/bin/ocamlc -c -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/print_step.cmo Code/DPLL/print_step.ml
+# Target: Code/DPLL/propa.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Code/DPLL/propa.cmo, file:Code/DPLL/propa.ml, implem, ocaml, quiet }
+/usr/bin/ocamlc -c -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/propa.cmo Code/DPLL/propa.ml # cached
 # Target: Code/DPLL/step.ml.depends, tags: { extension:ml, file:Code/DPLL/step.ml, ocaml, ocamldep, quiet }
 /usr/bin/ocamldep -modules Code/DPLL/step.ml > Code/DPLL/step.ml.depends # cached
 # Target: Code/DPLL/learning.ml.depends, tags: { extension:ml, file:Code/DPLL/learning.ml, ocaml, ocamldep, quiet }
 /usr/bin/ocamldep -modules Code/DPLL/learning.ml > Code/DPLL/learning.ml.depends # cached
 # Target: Code/DPLL/learning.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Code/DPLL/learning.cmo, file:Code/DPLL/learning.ml, implem, ocaml, quiet }
-/usr/bin/ocamlc -c -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/learning.cmo Code/DPLL/learning.ml
+/usr/bin/ocamlc -c -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/learning.cmo Code/DPLL/learning.ml # cached
+# Target: Code/DPLL/step.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Code/DPLL/step.cmo, file:Code/DPLL/step.ml, implem, ocaml, quiet }
+/usr/bin/ocamlc -c -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/step.cmo Code/DPLL/step.ml # cached
 # Target: Code/DPLL/unsat.ml.depends, tags: { extension:ml, file:Code/DPLL/unsat.ml, ocaml, ocamldep, quiet }
 /usr/bin/ocamldep -modules Code/DPLL/unsat.ml > Code/DPLL/unsat.ml.depends # cached
 # Target: Code/DPLL/unsat.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Code/DPLL/unsat.cmo, file:Code/DPLL/unsat.ml, implem, ocaml, quiet }
 /usr/bin/ocamlc -c -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/unsat.cmo Code/DPLL/unsat.ml # cached
-# Target: Code/DPLL/init.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Code/DPLL/init.cmo, file:Code/DPLL/init.ml, implem, ocaml, quiet }
-/usr/bin/ocamlc -c -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/init.cmo Code/DPLL/init.ml
-# Target: Code/DPLL/propa.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Code/DPLL/propa.cmo, file:Code/DPLL/propa.ml, implem, ocaml, quiet }
-/usr/bin/ocamlc -c -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/propa.cmo Code/DPLL/propa.ml
-# Target: Code/DPLL/step.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Code/DPLL/step.cmo, file:Code/DPLL/step.ml, implem, ocaml, quiet }
-/usr/bin/ocamlc -c -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/step.cmo Code/DPLL/step.ml
 # Target: Code/DPLL/dpll.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Code/DPLL/dpll.cmo, file:Code/DPLL/dpll.ml, implem, ocaml, quiet }
-/usr/bin/ocamlc -c -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/dpll.cmo Code/DPLL/dpll.ml
+/usr/bin/ocamlc -c -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/dpll.cmo Code/DPLL/dpll.ml # cached
 # Target: Code/DPLL/DPLL.cmo, tags: { byte, extension:cmo, file:Code/DPLL/DPLL.cmo, ocaml, pack, quiet }
-/usr/bin/ocamlc -pack Code/DPLL/clauses_basic.cmo Code/DPLL/watched.cmo Code/DPLL/clauses_wl.cmo Code/DPLL/types.cmo Code/DPLL/init.cmo Code/DPLL/print_step.cmo Code/DPLL/propa.cmo Code/DPLL/learning.cmo Code/DPLL/step.cmo Code/DPLL/unsat.cmo Code/DPLL/dpll.cmo -o Code/DPLL/DPLL.cmo
+/usr/bin/ocamlc -pack Code/DPLL/clauses_basic.cmo Code/DPLL/watched.cmo Code/DPLL/clauses_wl.cmo Code/DPLL/types.cmo Code/DPLL/init.cmo Code/DPLL/print_step.cmo Code/DPLL/propa.cmo Code/DPLL/learning.cmo Code/DPLL/step.cmo Code/DPLL/unsat.cmo Code/DPLL/dpll.cmo -o Code/DPLL/DPLL.cmo # cached
 # Target: Code/main.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:Code/main.cmo, file:Code/main.ml, implem, ocaml, quiet }
-/usr/bin/ocamlc -c -I Code -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/DPLL -I Code/Heuristics -o Code/main.cmo Code/main.ml
+/usr/bin/ocamlc -c -I Code -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/DPLL -I Code/Heuristics -o Code/main.cmo Code/main.ml # cached
 # Target: Code/General/sort.cmx, tags: { compile, extension:cmx, extension:ml, file:Code/General/sort.cmx, file:Code/General/sort.ml, for-pack(General), implem, native, ocaml, quiet }
 /usr/bin/ocamlopt -c -for-pack General -I Code/General -I Code/Lexers_Parsers -I Code/Theories -I Code/DPLL -I Code/Heuristics -o Code/General/sort.cmx Code/General/sort.ml # cached
 # Target: Code/General/cnf.cmx, tags: { compile, extension:cmx, extension:ml, file:Code/General/cnf.cmx, file:Code/General/cnf.ml, for-pack(General), implem, native, ocaml, quiet }
@@ -230,25 +230,25 @@ Warning 25: bad style, all clauses in this pattern-matching are guarded.
 # Target: Code/Theories/Theories.cmx, tags: { extension:cmx, file:Code/Theories/Theories.cmx, native, ocaml, pack, quiet }
 touch Code/Theories/Theories.mli  ; if  /usr/bin/ocamlopt -pack -I Code/Theories Code/Theories/base.cmx Code/Theories/empty.cmx Code/Theories/equality.cmx Code/Theories/simplex.cmx -o Code/Theories/Theories.cmx  ; then  rm -f Code/Theories/Theories.mli  ; else  rm -f Code/Theories/Theories.mli  ; exit 1; fi
 # Target: Code/DPLL/types.cmx, tags: { compile, extension:cmx, extension:ml, file:Code/DPLL/types.cmx, file:Code/DPLL/types.ml, for-pack(DPLL), implem, native, ocaml, quiet }
-/usr/bin/ocamlopt -c -for-pack DPLL -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/types.cmx Code/DPLL/types.ml
+/usr/bin/ocamlopt -c -for-pack DPLL -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/types.cmx Code/DPLL/types.ml # cached
+# Target: Code/DPLL/init.cmx, tags: { compile, extension:cmx, extension:ml, file:Code/DPLL/init.cmx, file:Code/DPLL/init.ml, for-pack(DPLL), implem, native, ocaml, quiet }
+/usr/bin/ocamlopt -c -for-pack DPLL -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/init.cmx Code/DPLL/init.ml # cached
 # Target: Code/DPLL/print_step.cmx, tags: { compile, extension:cmx, extension:ml, file:Code/DPLL/print_step.cmx, file:Code/DPLL/print_step.ml, for-pack(DPLL), implem, native, ocaml, quiet }
-/usr/bin/ocamlopt -c -for-pack DPLL -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/print_step.cmx Code/DPLL/print_step.ml
+/usr/bin/ocamlopt -c -for-pack DPLL -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/print_step.cmx Code/DPLL/print_step.ml # cached
+# Target: Code/DPLL/propa.cmx, tags: { compile, extension:cmx, extension:ml, file:Code/DPLL/propa.cmx, file:Code/DPLL/propa.ml, for-pack(DPLL), implem, native, ocaml, quiet }
+/usr/bin/ocamlopt -c -for-pack DPLL -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/propa.cmx Code/DPLL/propa.ml # cached
 # Target: Code/DPLL/learning.cmx, tags: { compile, extension:cmx, extension:ml, file:Code/DPLL/learning.cmx, file:Code/DPLL/learning.ml, for-pack(DPLL), implem, native, ocaml, quiet }
-/usr/bin/ocamlopt -c -for-pack DPLL -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/learning.cmx Code/DPLL/learning.ml
+/usr/bin/ocamlopt -c -for-pack DPLL -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/learning.cmx Code/DPLL/learning.ml # cached
+# Target: Code/DPLL/step.cmx, tags: { compile, extension:cmx, extension:ml, file:Code/DPLL/step.cmx, file:Code/DPLL/step.ml, for-pack(DPLL), implem, native, ocaml, quiet }
+/usr/bin/ocamlopt -c -for-pack DPLL -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/step.cmx Code/DPLL/step.ml # cached
 # Target: Code/DPLL/unsat.cmx, tags: { compile, extension:cmx, extension:ml, file:Code/DPLL/unsat.cmx, file:Code/DPLL/unsat.ml, for-pack(DPLL), implem, native, ocaml, quiet }
 /usr/bin/ocamlopt -c -for-pack DPLL -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/unsat.cmx Code/DPLL/unsat.ml # cached
-# Target: Code/DPLL/init.cmx, tags: { compile, extension:cmx, extension:ml, file:Code/DPLL/init.cmx, file:Code/DPLL/init.ml, for-pack(DPLL), implem, native, ocaml, quiet }
-/usr/bin/ocamlopt -c -for-pack DPLL -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/init.cmx Code/DPLL/init.ml
-# Target: Code/DPLL/propa.cmx, tags: { compile, extension:cmx, extension:ml, file:Code/DPLL/propa.cmx, file:Code/DPLL/propa.ml, for-pack(DPLL), implem, native, ocaml, quiet }
-/usr/bin/ocamlopt -c -for-pack DPLL -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/propa.cmx Code/DPLL/propa.ml
-# Target: Code/DPLL/step.cmx, tags: { compile, extension:cmx, extension:ml, file:Code/DPLL/step.cmx, file:Code/DPLL/step.ml, for-pack(DPLL), implem, native, ocaml, quiet }
-/usr/bin/ocamlopt -c -for-pack DPLL -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/step.cmx Code/DPLL/step.ml
 # Target: Code/DPLL/dpll.cmx, tags: { compile, extension:cmx, extension:ml, file:Code/DPLL/dpll.cmx, file:Code/DPLL/dpll.ml, for-pack(DPLL), implem, native, ocaml, quiet }
-/usr/bin/ocamlopt -c -for-pack DPLL -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/dpll.cmx Code/DPLL/dpll.ml
+/usr/bin/ocamlopt -c -for-pack DPLL -I Code/DPLL -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/Heuristics -o Code/DPLL/dpll.cmx Code/DPLL/dpll.ml # cached
 # Target: Code/DPLL/DPLL.cmx, tags: { extension:cmx, file:Code/DPLL/DPLL.cmx, native, ocaml, pack, quiet }
-touch Code/DPLL/DPLL.mli  ; if  /usr/bin/ocamlopt -pack -I Code/DPLL Code/DPLL/clauses_basic.cmx Code/DPLL/watched.cmx Code/DPLL/clauses_wl.cmx Code/DPLL/types.cmx Code/DPLL/init.cmx Code/DPLL/print_step.cmx Code/DPLL/learning.cmx Code/DPLL/propa.cmx Code/DPLL/step.cmx Code/DPLL/unsat.cmx Code/DPLL/dpll.cmx -o Code/DPLL/DPLL.cmx  ; then  rm -f Code/DPLL/DPLL.mli  ; else  rm -f Code/DPLL/DPLL.mli  ; exit 1; fi
+touch Code/DPLL/DPLL.mli  ; if  /usr/bin/ocamlopt -pack -I Code/DPLL Code/DPLL/clauses_basic.cmx Code/DPLL/watched.cmx Code/DPLL/clauses_wl.cmx Code/DPLL/types.cmx Code/DPLL/init.cmx Code/DPLL/print_step.cmx Code/DPLL/learning.cmx Code/DPLL/propa.cmx Code/DPLL/step.cmx Code/DPLL/unsat.cmx Code/DPLL/dpll.cmx -o Code/DPLL/DPLL.cmx  ; then  rm -f Code/DPLL/DPLL.mli  ; else  rm -f Code/DPLL/DPLL.mli  ; exit 1; fi # cached
 # Target: Code/main.cmx, tags: { compile, extension:cmx, extension:ml, file:Code/main.cmx, file:Code/main.ml, implem, native, ocaml, quiet }
-/usr/bin/ocamlopt -c -I Code -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/DPLL -I Code/Heuristics -o Code/main.cmx Code/main.ml
+/usr/bin/ocamlopt -c -I Code -I Code/Lexers_Parsers -I Code/General -I Code/Theories -I Code/DPLL -I Code/Heuristics -o Code/main.cmx Code/main.ml # cached
 # Target: Code/main.native, tags: { dont_link_with, extension:native, file:Code/main.native, link, native, ocaml, program, quiet }
 /usr/bin/ocamlopt unix.cmxa nums.cmxa Code/General/General.cmx Code/Heuristics/Heuristics.cmx Code/Lexers_Parsers/parser_cnf.cmx Code/Lexers_Parsers/lexer_cnf.cmx Code/Lexers_Parsers/parser_equ.cmx Code/Lexers_Parsers/lexer_equ.cmx Code/Lexers_Parsers/parser_simplex.cmx Code/Lexers_Parsers/lexer_simplex.cmx Code/Lexers_Parsers/parser_tseitin.cmx Code/Lexers_Parsers/lexer_tseitin.cmx Code/Theories/Theories.cmx Code/DPLL/DPLL.cmx Code/main.cmx -o Code/main.native
 # Compilation successful.

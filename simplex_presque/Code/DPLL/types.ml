@@ -141,6 +141,7 @@ type parameters = {
 	mutable draw : bool ;		(* Indique si le mode iteractif du clause learning est activé *)
 	unsat : bool ;			(* Indique si l'explication de l'insatisfiabilité est désactivée *)
 	print : bool ;			(* Indique si on doit afficher les étapes intermédiaires de DPLL *)
+
 }
 
 

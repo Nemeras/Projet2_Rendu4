@@ -64,7 +64,7 @@ module P = Print_step (C)
 
 
 (* Boucle principale de DPLL *)
-let loop cnf stack solver clauses current pos heuristic origins solution levels orders k para compt =
+let loop cnf stack solver clauses current pos heuristic origins solution levels orders k para compt unsatdpllt=
 	
 	while abs !k <= cnf.v_real && !k <> 0 do
 		incr compt ;
@@ -86,20 +86,20 @@ let loop cnf stack solver clauses current pos heuristic origins solution levels 
 		
 		(* Détection des clauses unitaires *)
 		if solution.(0) = 0 then
-			Bcp.propa stack solver current pos heuristic solution levels orders para ;
+			Bcp.propa stack solver current pos heuristic solution levels orders para unsatdpllt;
 		
 		(* Si toutes les variables ont été instanciées *)
 		if H.is_instanciation_full heuristic then
 			(* S'il y a contradiction : backtrack *)
 			if solution.(0) < 0 then
-				S.continue stack solver clauses current pos heuristic origins solution levels orders k para
+				S.continue stack solver clauses current pos heuristic origins solution levels orders k para unsatdpllt
 			(* Sinon : c'est fini *)
 			else
 				k := cnf.v_real + 1
 		
 		(* Sinon : on continue *)
 		else
-			S.continue stack solver clauses current pos heuristic origins solution levels orders k para
+			S.continue stack solver clauses current pos heuristic origins solution levels orders k para unsatdpllt
 	
 	done
 
@@ -127,7 +127,7 @@ let result k l clauses origins solution para =
 	False si cnf n'est pas satisfiable.
 	True solution si cnf est satisfiable, avec solution une instanciation qui la satisfait. *)
 
-let solve cnf solver learning draw unsat print =
+let solve cnf solver learning draw unsat print unsatdpllt=
 	
 	(* Initialisation des variables *)
 	let
@@ -140,7 +140,7 @@ let solve cnf solver learning draw unsat print =
 	= I.init cnf learning draw unsat print in
 	
 	(* Boucle principale *)
-	loop cnf stack solver clauses current pos heuristic origins solution levels orders k para compt ;
+	loop cnf stack solver clauses current pos heuristic origins solution levels orders k para compt unsatdpllt;
 	
 	(* Résultat *)
 	result k l clauses origins solution para
