@@ -18,17 +18,20 @@ struct
 
 module P = Print_step (C)
 
-		(** PARIS ET BACKTRACKING **)
+
+
+		(** ETAPES DU BACKTRACK **)
 
 
 
 (* Effectue une étape de backtrack *)
 let backtrack_step stack solver current pos heuristic solution levels orders k para =
 	
-	(* Si la valeur de début de pile est positive et n'est pas issue d'une boolean constraint propagation,
-	   donc pas nécessaire, on peut supposer l'opposé. On arrête alors le backtrack.                       *)
+	(* Si la valeur de début n'est pas issue d'une boolean constraint propagation, donc pas nécessaire,
+	   on peut supposer l'opposé. On arrête alors le backtrack.                                         *)
 	if para.nb_back = 0 && abs solution.(abs !k) = 1 then
 		begin
+		(* Dernier backtrack *)
 		solution.(0) <- 0 ;
 		para.back <- false ;
 		H.backtrack heuristic !k ;
@@ -38,6 +41,8 @@ let backtrack_step stack solver current pos heuristic solution levels orders k p
 		solution.(abs !k) <- 0 ;
 		levels.(abs !k) <- 0 ;
 		para.level <- para.level - 1 ;
+		
+		(* S'il n'y a pas de clause learning, on suppose l'opposé en le considérant comme une déduction *)
 		if not para.learning then
 			begin
 			k := - !k ;
@@ -56,7 +61,7 @@ let backtrack_step stack solver current pos heuristic solution levels orders k p
 	else
 		begin
 		if abs solution.(abs !k) = 1 then
-			para.level <- para.level - 1 ; (* Un niveau de décision a été entièrement annulé *)
+			para.level <- para.level - 1 ;	(* Un niveau de décision a été entièrement annulé *)
 		P.print_backtrack !k solution.(abs !k) para.print ;
 		solution.(abs !k) <- 0 ;
 		levels.(abs !k) <- 0 ;
@@ -66,6 +71,10 @@ let backtrack_step stack solver current pos heuristic solution levels orders k p
 		k := C.pick stack
 		end
 
+
+
+
+		(** ITERATION DE DPLL **)
 
 
 
@@ -82,6 +91,7 @@ let continue stack solver clauses current pos heuristic origins solution levels 
 		para.back <- true ;
 		
 		if solution.(0) = -max_int then
+			(* La contradiction vient de la théorie *)
 			begin
 			let new_clause = T.unsat solver in
 			let clause_mod = C.maj_cl stack new_clause pos levels current.length in
@@ -104,9 +114,11 @@ let continue stack solver clauses current pos heuristic origins solution levels 
 		backtrack_step stack solver current pos heuristic solution levels orders k para
 		end
 	
-	(* S'il n'y a pas de contradiction : on suppose par défaut la première variable libre comme vraie *)
+	(* S'il n'y a pas de contradiction : on fait appel à l'heuristique pour choisir le prochain pari *)
 	else
 		begin
+		(* On fournit, selon l'heuristique, l'état courant de la CNF (pour MOMS et DLIS), ainsi
+		   que la méthode de travail sur les clauses (WL ou non)                                *)
 		k := H.next heuristic pos (C.current_clauses current solution H.heuristic) C.wl ;
 		if !k <> 0 && solution.(abs !k) = 0 then
 			begin

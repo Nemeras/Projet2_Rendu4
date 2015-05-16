@@ -6,6 +6,7 @@ open General
 open Cnf
 open DynArray
 open Dot
+
 (* On ouvre Dot et DynArray pour pouvoir utiliser sans avoir de Warning les types enregistrement qui y sont définis *)
 
 
@@ -304,15 +305,11 @@ let is_clause_true (b,c,l) solution =
 
 
 
+		(** HEURISTIQUES **)
 
 
-
-
-
-
-
-
-
+(* Renvoie l'état courant de la CNF en éliminant les littéraux faux et les clauses satisfaites.
+   Ne s'exécute qui si MOMS est activé.                                                         *)
 let current_clauses current solution h =
 	let res = DynArray.make 0 [] in
 	if h = 2 then

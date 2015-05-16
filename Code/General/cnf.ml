@@ -5,12 +5,12 @@ open Printf
 open List
 
 
-type literal = int				(* Si x_k est une variable, k est son littéral positif et -k son littéral négatif *)
+type literal = int		(* Si x_k est une variable, k est son littéral positif et -k son littéral négatif *)
 
 type clause = literal list
 
 type cnf = {
-	mutable clauses : clause list ;	(* La liste des clauses formant la conjonction *)
+	mutable clauses : clause list ;		(* La liste des clauses formant la conjonction *)
 	v : int ;				(* Indice théorique (indiqué dans le fichier) maximal des variables *)
 	mutable v_real : int ;			(* Indice maximal réel des variables *)
 	c : int ;				(* Nombre théorique de clauses *)
@@ -25,7 +25,8 @@ type solution =
 
 
 
-		(* CLAUSES *)
+		(** CLAUSES **)
+
 
 (* On considère que toutes les clauses sont triées par indices de variables décroissants,
    et qu'aucun littéral n'y apparait en double.
@@ -49,50 +50,24 @@ let trivial c =
 	aux c 0
 
 
-(* Fusionne les clauses triées c1 et c2 (OU(c1,c2)) *)
-let rec fusion c1 c2 =
-	match c1, c2 with
-	| [],_ -> c2
-	| _,[] -> c1
-	| x::c3,y::c4 when x = -y -> [0]	(* Tautologie *)
-	| x::c3,y::c4 when x = y ->
-		let l = fusion c3 c4 in
-		if l = [0] then
-			[0]
-		else
-			(* On supprime le doublon y *)
-			x::l
-	| x::c3,y::_ when abs x < abs y ->
-		let l = fusion c3 c2 in
-		if l = [0] then
-			[0]
-		else
-			x::l
-	| x::_,y::c4 ->
-		let l = fusion c1 c4 in
-		if l = [0] then
-			[0]
-		else
-			y::l
-
-
 (* Résolution de c1 et c2 (triées), quand, à part le littéral sur lequel on fait la résolution, c1 et c2
    ne partagent pas une même variable sous des polarités différentes.                           *)
 let rec resol c1 c2 =
 	match c1, c2 with
 	| [],_ -> c2
 	| _,[] -> c1
-	| x::c3,y::c4 when x = -y -> resol c3 c4	(* Tautologie :  ne se produit jamais en pratique *)
+	| x::c3,y::c4 when x = -y ->
+		resol c3 c4	(* Tautologie :  ne se produit jamais en pratique *)
 	| x::c3,y::c4 when x = y ->
 		x::(resol c3 c4)
 	| x::c3,y::_ when abs x < abs y ->
 		x::(resol c3 c2)
 	| x::_,y::c4 ->
-		y::(fusion c1 c4)
+		y::(resol c1 c4)
 
 
 
-		(* CNF *)
+		(** CNF **)
 
 
 (* Convertit une CNF en string *)
@@ -129,7 +104,7 @@ let ordo cnf =
 
 
 
-		(* SOLUTIONS *)
+		(** SOLUTIONS **)
 
 
 (* Affiche l'instanciation de solution *)

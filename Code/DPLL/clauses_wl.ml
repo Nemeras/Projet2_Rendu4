@@ -289,19 +289,11 @@ let is_clause_true c solution =
 
 
 
+		(** HEURISTIQUES **)
 
 
-
-
-
-
-
-
-
-
-
-
-
+(* Renvoie l'état courant de la CNF en éliminant les littéraux faux et les clauses satisfaites.
+   Ne s'exécute que si MOMS ou DLIS sont activés.                                               *)
 let current_clauses current solution h =
 	let res = DynArray.make 0 [] in
 	if h = 2 || h = 3 then

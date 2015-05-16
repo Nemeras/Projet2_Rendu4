@@ -22,6 +22,8 @@ open General.Tseitin
 
 
 %%
+
+
 formula:
 	| form formula		{ (fst $1)::(fst $2), max (snd $1) (snd $2) }
 	| EOF			{ [], 0 }

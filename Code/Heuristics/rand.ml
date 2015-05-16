@@ -1,16 +1,25 @@
+			(** HEURISTIQUE RAND **)
+			(** Type : Heuristic **)
+
+
+(* Permet de choisir le prochain pari aléatoirement *)
+
+
+(* Ces commentaires complètent ceux faits dans types.ml *)
+
 
 open General
 open Cnf
 
 
 
-type struc = {
-	taken : bool array ;
-	mutable nbr : int
-}
-
-
 let heuristic = 1
+
+
+type struc = {
+	taken : bool array ;	(* taken.(i) = true si la variable i est déjà instanciée *)
+	mutable nbr : int	(* Nombre de variables restant à instancier *)
+}
 
 
 let init cnf pos =
@@ -34,6 +43,8 @@ let learning h c =
 	()
 
 
+(* On prend la k-ème variable non satisfaite, où k est choisi aléatoirement,
+   et on choisit aléatoirement le signe de l'instanciation                   *)
 let next h pos current wl =
 	let n = ref (Random.int h.nbr) in
 	let i = ref 1 in

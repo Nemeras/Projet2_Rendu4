@@ -19,13 +19,15 @@ open General.Tseitin
 
 
 %start formula
-%type <(int*int) General.Tseitin.formula list> formula	/* On renvoie une formule dont les atomes sont des couples, avec des nombres
-                                                   	* positifs si c'est une égalité
-                                                        * négatifs sinon                                                       */
-%type <(int*int) General.Tseitin.formula> form
+%type <(int*int) General.Tseitin.formula list> formula
+/* On renvoie une formule dont les atomes sont des couples, avec des nombres
+	* positifs si c'est une égalité
+	* négatifs sinon                                                     */
 			
 
 %%
+
+
 formula:
 	| form formula		{ $1::$2 }
 	| EOF			{ [] }

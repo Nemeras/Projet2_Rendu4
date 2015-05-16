@@ -64,8 +64,9 @@ let iter_learning graph clauses solution levels orders start activate para origi
 			set_color graph (- !lit) Purple (Array.length solution - 1) ;
 		
 		pos_c := (abs solution.(abs !lit)) - 2 ;	(* Position de la clause ayant causé la mise à faux de lit *)
+		
 		(* Résolution : Fusion des deux clauses dans lesquelles on a enlevé la variable sur laquelle on fait la résolution *)
-		c := Cnf.fusion (List.filter (fun i -> i <> !lit) !c) (List.filter (fun i -> i <> - !lit) clauses.a.(!pos_c)) ;
+		c := Cnf.resol !c clauses.a.(!pos_c) ;
 		
 		if para.unsat then
 			origins.a.(origins.length-1) <- (!pos_c)::(origins.a.(origins.length-1)) ;
@@ -183,7 +184,7 @@ let learning stack solver clauses current pos heuristic solution levels orders k
 		let clause_mod = C.maj_cl stack new_clause pos levels current.length in
 		DynArray.add clauses new_clause [] ;
 		DynArray.add current clause_mod (C.init_value []) ;
-		H.learning heuristic new_clause ;
+		H.learning heuristic new_clause ;	(* Mise à jour de l'heuristique (pour VSIDS) *)
 		
 		(* Détermination du niveau de backtrack *)
 		let x = level_back new_clause levels uip in

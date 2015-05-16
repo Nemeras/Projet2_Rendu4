@@ -24,6 +24,7 @@ struct
 	
 end
 
+
 (* Fonction principale *)
 let _ =
 	
@@ -37,7 +38,7 @@ let _ =
 	let cnf = ref false in 		(* True ssi on active l'affichage de la cnf étudiée *)
 	
 	let theory = ref 0 in		(* Numéro de la théorie utilisée *)
-	let heuristic = ref 0 in
+	let heuristic = ref 0 in	(* Numéro de l'heuristique utilisée *)
 	
 	let options = [
 		("-wl", Arg.Set wl, "Active les littéraux surveillés.") ;
@@ -50,19 +51,21 @@ let _ =
 		("-explainunsat", Arg.Unit (fun () -> learning := true ; unsat := true), "Active la preuve de l'insatisfiabilité.") ;
 		("-tseitin", Arg.Unit (fun () -> theory := 1), "Lit une formule logique quelconque.") ;
 		("-equality", Arg.Unit (fun () -> theory := 2), "Solveur sur la théorie de l'égalité.") ;
+		("-simplex", Arg.Unit (fun () -> theory := 3), "Solveur sur l'arithmétique linéaire.") ;
 		("-print", Arg.Set print, "Active l'affichage des étapes intermédiaires de l'algorithme.") ;
 		("-cnf", Arg.Set cnf, "Active l'affichage de la cnf étudiée dans DPLL.")
 	] in
 	
 	Arg.parse options (fun s -> file := s)	"Ce programme résout l'instance de SAT / Tseitin / la théorie de l'égalité donnée dans le fichier en entrée." ;
 	
-	if !theory = 2 && !unsat then
-		failwith "L'égalité et l'explication de l'insatisfiabilité sont incompatibles dans DPLL(T)" ;
+	if !theory >= 2 && !unsat then
+		failwith "L'égalité et l'arithmétique linéaire sont incompatibles avec l'explication de l'insatisfiabilité dans DPLL(T)" ;
 	
+	(* Initialisation, si besoin est, de l'aléatoire *)
 	if !heuristic = 1 then
 		Random.self_init () ;
 	
-	let module T = (val (choose_theory !theory) : Theory) in	(* Théorie utilisée *)
+	let module T = (val (choose_theory !theory) : Theory) in		(* Théorie utilisée *)
 	let module Launch = Init_theory (T) in
 	Launch.init !file !wl !learning !heuristic !draw !unsat !print !cnf	(* Lancement de l'algorithme *)
 	

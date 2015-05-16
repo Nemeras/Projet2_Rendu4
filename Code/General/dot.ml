@@ -5,8 +5,8 @@ open Printf
 
 
 
-(* Graphes : liste d'arêtes et tableau donnant les couleurs de chaque sommet *)
-(* Les sommets peuvent être :
+(* Graphes : liste d'arêtes et tableau donnant les couleurs de chaque sommet
+   Les sommets peuvent être :
 	0 : Conflit
 	0 < n <= nb_variables : littéral positif n
 	nb_variables < n < 2*nb_variables : littéral négatif -n+nb_variables
@@ -43,6 +43,7 @@ let to_lit i nb_variables =
 		-i + nb_variables
 
 
+(* Crée le graphe associé au nombre de variables indiqué *)
 let create_graph nb_variables =
 	{ e = [] ; c = Array.make (1+2*nb_variables) None }
 

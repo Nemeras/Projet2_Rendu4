@@ -1,4 +1,5 @@
 		(** THEORIE IMPLEMENTANT LA GESTION DES FICHIERS CNF **)
+				(** Type : Theory **)
 
 open General
 open Cnf

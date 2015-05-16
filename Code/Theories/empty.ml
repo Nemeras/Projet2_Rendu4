@@ -1,4 +1,5 @@
-		(** THEORIE RELATIVE A TSEITIN **)
+			(** THEORIE RELATIVE A TSEITIN **)
+				(** Type : Theory **)
 
 open General
 

@@ -24,6 +24,7 @@ type lev = int array	(* Niveaux de décisions auxquels les variables ont été i
 module type Clauses =
 sig
 	
+		(* Indique à tout moment au solveur s'il manipule, on non, des littéraux surveillés *)
 	val wl : bool
 	
 		(* Type des clauses contenues dans le tableau current *)
@@ -67,6 +68,8 @@ sig
 		(* Indique si la clause en entrée est satisfaite *)
 	val is_clause_true : t -> sol -> bool
 	
+		(* Renvoie l'ensemble des clauses courantes, en supprimant les littéraux mis à faux et les clauses satisfaites
+		   Sert dans certaines heuristiques                                                                            *)
 	val current_clauses : t dynarray -> sol -> int -> Cnf.clause dynarray
 	
 end
@@ -79,6 +82,7 @@ let version wl =
 		(module Clauses_basic : Clauses)	(* Version de base *)
 	else
 		(module Clauses_wl : Clauses)		(* Version WL *)
+
 
 
 
@@ -121,7 +125,57 @@ let choose_theory theory =
 	| 0 -> (module Base : Theory)		(* Théorie de base qui ne concerne que les CNF *)
 	| 1 -> (module Empty : Theory)		(* Thérie vide implémentant Tseitin *)
 	| 2 -> (module Equality : Theory)	(* Théorie de l'égalité *)
+	| 3 -> (module Simplex : Theory)	(* Théorie de l'égalité *)
 	| _ -> failwith "Erreur dans le choix de la théorie"
+
+
+
+
+
+		(** HEURISTIQUES *)
+
+
+(* Type de module implémentant une heuristique *)
+module type Heuristic =
+sig
+	
+		(* Indique à tout moment quelle heuristique le solveur utilise *)
+	val heuristic : int
+	
+		(* Structure de donnée utilisée dans l'heuristique *)
+	type struc
+	
+		(* Crée, à partir de la CNF à étudier, la structure sur laquelle s'appuie l'heuristique *)
+	val init : Cnf.cnf -> pos -> struc
+	
+		(* Met à jour la structure supportant l'heuristique lors d'un update *)
+	val update : struc -> Cnf.literal -> unit
+	
+		(* Met à jour la structure supportant l'heuristique lors d'un backtrack *)
+	val backtrack : struc -> Cnf.literal -> unit
+	
+		(* Met à jour la structure supportant l'heuristique lors de l'apprentissage d'une clause *)
+	val learning : struc -> Cnf.clause -> unit
+	
+		(* Choisit le prochain pari *)
+	val next : struc -> pos -> Cnf.clause dynarray -> bool -> Cnf.literal
+	
+		(* Indique si toutes les variables ont été instanciées *)
+	val is_instanciation_full : struc -> bool
+	
+end
+
+
+
+(* Renvoie l'heuristique correspondant au numéro *)
+let choose_heuristic heuristic =
+	match heuristic with
+	| 0 -> (module None : Heuristic)
+	| 1 -> (module Rand : Heuristic)
+	| 2 -> (module Moms : Heuristic)
+	| 3 -> (module Dlis : Heuristic)
+	| 4 -> (module Vsids : Heuristic)
+	| _ -> failwith "Erreur dans le choix de l'heuristique"
 
 
 
@@ -141,42 +195,3 @@ type parameters = {
 	unsat : bool ;			(* Indique si l'explication de l'insatisfiabilité est désactivée *)
 	print : bool ;			(* Indique si on doit afficher les étapes intermédiaires de DPLL *)
 }
-
-
-
-
-
-
-
-module type Heuristic =
-sig
-	
-	type struc
-	
-	val heuristic : int
-	
-	val init : Cnf.cnf -> pos -> struc
-	
-	val update : struc -> Cnf.literal -> unit
-	
-	val backtrack : struc -> Cnf.literal -> unit
-	
-	val learning : struc -> Cnf.clause -> unit
-	
-	val next : struc -> pos -> Cnf.clause dynarray -> bool -> Cnf.literal
-	
-	val is_instanciation_full : struc -> bool
-	
-end
-
-
-
-(* Renvoie l'heuristique correspondant au numéro *)
-let choose_heuristic heuristic =
-	match heuristic with
-	| 0 -> (module None : Heuristic)
-	| 1 -> (module Rand : Heuristic)
-	| 2 -> (module Moms : Heuristic)
-	| 3 -> (module Dlis : Heuristic)
-	| 4 -> (module Vsids : Heuristic)
-	| _ -> failwith "Erreur dans le choix de l'heuristique"

@@ -20,9 +20,8 @@ let func_add dyn cst i =
 	| i -> cst
 
 
-(* Insère x en fin du tableau dynamique
- * cst sera inséré dans les éléments de dyn.a inutilisés
- *)
+(* Insère x en fin du tableau dynamique.
+   cst sera inséré dans les éléments de dyn.a inutilisés. *)
 let add dyn x cst=
 	(* Si dyn.a est saturé, on double la taille de dyn.a *)
 	if dyn.length = (Array.length dyn.a) then 

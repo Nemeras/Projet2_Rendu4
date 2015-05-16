@@ -22,15 +22,6 @@ let is_true n solution =
 	n*solution.(abs n) > 0
 
 
-(* Recule le premier élément de c jusqu'à rencontrer le bloc des littéraux à faux. *)
-let rec to_end c solution =
-	match c with
-	| h::h2::tail when is_false h2 solution -> c
-	| h::h2::tail -> h2::(to_end (h::tail) solution)
-	| [h] -> c
-	| [] -> []
-
-
 (* Place tous les littéraux faux au fond de la liste *)
 let rec all_false_to_end c solution =
 	let rec aux c false_list =

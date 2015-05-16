@@ -1,4 +1,5 @@
-		(** INITIALISATION **)
+			(** INITIALISATION DE DPLL **)
+
 
 open General
 open Heuristics
@@ -57,6 +58,7 @@ let init cnf learning draw unsat print =
 			DynArray.make 0 []
 	in
 	
+	(* Initialisation de l'heuristique *)
 	let heuristic = H.init cnf pos in
 	
 	(* Paramètres des algorithmes de Step *)

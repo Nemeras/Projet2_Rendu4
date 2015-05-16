@@ -1,4 +1,5 @@
 			(** THEORIE DE L'EGALITE **)
+			    (** Type : Theory **)
 
 open General
 
@@ -49,9 +50,9 @@ module KeyAtom = Map.Make (Atom)
 open KeyAtom
 
 
-(* Construit la Map associant à chaque atome sa variable dans DPLL
-   Renvoie la liste de formules dans laquelle on a remplacé les atomes par leurs variables et un tableau
-   représentant la fonction inverse de la Map construite                                                 *)
+(* Construit la Map associant à chaque atome sa variable dans DPLL.
+   Renvoie la liste de formules dans laquelle on a remplacé les atomes par leurs variables et un tableau représentant
+   la fonction inverse de la Map construite.                                                                          *)
 let analyze form_list =
 	let m = ref empty in
 	let rec aux f =
@@ -164,7 +165,7 @@ let union x y aa lit =
 
 
 
-		(** UPDATE / BACKTRACK **)
+		(** UPDATE **)
 
 
 (* Choisit la modification à apporter à la structure selon la nature de l'instanciation *)
