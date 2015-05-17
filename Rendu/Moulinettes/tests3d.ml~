@@ -1,0 +1,88 @@
+let test file options =
+	let t1 = Unix.gettimeofday () in
+	let _ = Unix.system ("./resol " ^ file ^ options ^ " > trash") in
+	let t2 = Unix.gettimeofday () in
+	t2-.t1
+
+
+let create_file dir n m j =
+	let name = Printf.sprintf "%s/sat%d.cnf" dir j in
+	let f = open_out name in
+	Printf.fprintf f "%s" (Sat.create n m 0) ;
+	close_out f ;
+	let name = Printf.sprintf "%s/unsat%d.cnf" dir j in
+	let f = open_out name in
+	Printf.fprintf f "%s" (Unsat.create n m 0) ;
+	close_out f
+
+
+let series file med j wl =
+	let t = test file (" -vsids" ^ wl) in
+	med.(j) <- t
+
+
+let median med =
+	Array.sort compare med ;
+	med.(Array.length med / 2)
+
+
+let tests n m nbr wl =
+	let res = Array.make_matrix nbr nbr 0. in
+	let _ = Unix.system "rm -r Files" in
+	Unix.mkdir "Files" 0o777 ;
+	for i = 1 to nbr do
+		let n0 = (20 + i*(n-20)/nbr) in
+		let dir0 = Printf.sprintf "Files/%d" n0 in
+		Unix.mkdir dir0 0o777 ;
+		for k = 1 to nbr do
+			let dir = Printf.sprintf "Files/%d/%d" n0 (k*m/nbr) in
+			Unix.mkdir dir 0o777 ;
+			for j = 1 to 5 do
+				create_file dir n0 (k*m/nbr) j
+			done
+		done ;
+		for k = 1 to nbr do
+			let med = Array.make 10 0. in
+			Printf.printf "Début : %dv / %dc\t" n0 (k*m/nbr) ; flush stdout ;
+			let dir = Printf.sprintf "Files/%d/%d" n0 (k*m/nbr) in
+			for j = 1 to 5 do
+				series (Printf.sprintf "%s/sat%d.cnf" dir j) med (2*(j-1)) wl  ;
+				series (Printf.sprintf "%s/unsat%d.cnf" dir j) med (2*(j-1)+1) wl ;
+			done ;
+			print_string "Fait\n" ; flush stdout ;
+			res.(i-1).(k-1) <- median med ;
+		done ;
+		let _ = Unix.system (Printf.sprintf "rm -r Files/%d" n0) in ()
+	done ;
+	let _ = Unix.system "rm -r Files" in
+	res
+
+
+let dat res n m nbr =
+	let f = open_out "comparaison3d.dat" in
+	Printf.fprintf f "n m time\n" ;
+	for i = 0 to Array.length res - 1 do
+		for j = 0 to Array.length res.(0) - 1 do
+			let n0 = (20 + (i+1)*(n-20)/nbr) in
+			Printf.fprintf f "%d %d %f\n" n0 ((j+1)*m/nbr) res.(i).(j)
+		done ;
+		Printf.fprintf f "\n"
+	done ;
+	close_out f
+
+
+let generate () =
+	Unix.system "gnuplot -persist Moulinettes/plot3d.p"
+
+
+let _ =
+	let wl = ref "" in
+	let nbr = ref 10 in
+	let options = [
+		("-nbr", Arg.Set_int nbr, "Permet de choisir le nombre de tests") ;
+		("-wl", Arg.Unit (fun () -> wl :=  " -wl"), "Fait les tests en activant les littéraux surveillés")
+	] in
+	Arg.parse options (fun s -> ()) "Trace une courbe en 3D du temps d'exécution en fonction du nombre de clauses et de variables" ;
+	let res = tests (int_of_string Sys.argv.(1)) !nbr !wl in
+	dat res (int_of_string Sys.argv.(1)) !nbr ;
+	generate ()

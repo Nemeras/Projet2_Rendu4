@@ -1,0 +1,19 @@
+reset
+
+set term svg
+set output "perfs.svg" # le nom du fichier qui est engendre
+
+set title "Comparaison empty/WL avec CL"
+set xlabel "Nombre de variables"
+set ylabel "Temps median d'execution en s"
+
+
+# Dessin en joignant des points
+set style data linespoints
+
+set pointsize 2   # la taille des points
+
+
+plot "comparaison.dat" using 1:2 title columnheader(2), \
+     "comparaison.dat" using 1:3 title columnheader(3)
+

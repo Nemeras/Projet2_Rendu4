@@ -1,0 +1,22 @@
+reset
+
+set term svg
+set output "perfs_wl.svg"
+
+set title "Comparaison heuristiques avec WL"
+set xlabel "Nombre de variables"
+set ylabel "Temps median d'execution"
+
+set key on outside left bmargin
+
+set style data linespoints
+
+set pointsize 1
+
+
+plot "comparaison.dat" using 1:6 title columnheader(6), \
+     "comparaison.dat" using 1:7 title columnheader(7), \
+     "comparaison.dat" using 1:8 title columnheader(8), \
+     "comparaison.dat" using 1:9 title columnheader(9), \
+     "comparaison.dat" using 1:11 title columnheader(11)
+
